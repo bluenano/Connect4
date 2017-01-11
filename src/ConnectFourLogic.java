@@ -6,221 +6,251 @@
  * working/tested
  */
 
+import java.util.Random;
+
 public class ConnectFourLogic {
 
-    private static int winSize;
-    private static char[][] field;
-    private static boolean isRed;
+    private final int DEFAULT_COL = 7;
+    private final int DEFAULT_ROW = 6;
+    private final int DEFAULT_WIN = 4;
     
-    public ConnectFourLogic(int fieldSize, int winSize) {
-	field = new char[fieldSize][fieldSize];
-	
-    	for (int y = 0; y < field.length; y++) {
-	    for (int x = 0; x < field[y].length; x++) {
-		field[y][x] = 'c';
-	    }
-    	}
-	this.winSize = winSize;
-	isRed = true;
-    }
+    private final char EMPTY = 'e';
+    private final char RED = 'r';
+    private final char YELLOW = 'y';
+
+    private char currentMove;
+    private char[][] board;
+    private int columns;
+    private int rows;
+    private int winSize;
 
     
-    public static boolean makeMove(int column) {
-	if (column < 0 || column > field.length) {
-	    return false;
-	}
-	else if (!putDisk(column, isRed ? 'R' : 'Y')) {
-	    return false;
-        }
+    public ConnectFourLogic(int columns, int rows, int winSize) {
+	currentMove = setFirstMove();
+	System.out.println(currentMove);
 	
-	return true;
-    }
-    
-    // This method attempts to put the disk of the given color in the given column.
-    // It returns true if successful and false if the column is filled and we cannot 
-    // put a disk.
-    private static boolean putDisk(int column, char color) {
-        // If the first disk is there, the column is filled, returning false.
-        if (field[0][column] != 'c')
-            return false;
+	if(columns > 0)
+	    this.columns = columns;
+	else
+	    this.columns = DEFAULT_COL;
 	
-        // Check all elements in the column.
-        for (int row = 0; row < field.length; ++row) {
-            // If we found something, which means if the character is not
-            // zero character
-            if (field[row][column] != 'c') {
-                // Put the disk on top of the current one.
-                field[row-1][column] = color;
-                isRed = !isRed;
-                return true;
-            }
-        }
-        
-        // If no other disks found, we place this disk at the bottom.
-        field[field.length-1][column] = color;
-        isRed = !isRed;
-        return true;
-    }
-    
-    public char isOver() {
-        char winner = getWinnerInRows();
-        if (winner != 'c') return winner;
-        winner = getWinnerInColumns();
-        if (winner != 'c') return winner;
-        winner = getWinnerInDiagonals();
-        if (winner != 'c') return winner;
-	
-        // Now we need to check if there are empty positions, otherwise it is a draw
-        for (int i = 0; i < field.length; ++i)
-            for (int j = 0; j < field[i].length; ++j)
-                if (field[i][j] == 'c') return 'c';
-	
-        return 'D';
-    }
-    
-    // Check rows, if there are 4 or more disks of the same color - return winner color
-    private static char getWinnerInRows() {
-        // Check rows and see if there are 4 disks of the same color
-        for (int row = 0; row < field.length; ++row) {
-            int count = 1;
-            // We will compare current element with the previous
-            for (int column = 1; column < field[row].length; ++column) {
-                if (field[row][column] != 'c' &&
-                    field[row][column] == field[row][column-1])
-                    ++count;
-                else
-                    count = 1;
+	if(rows > 0)
+	    this.rows = rows;
+	else
+	    this.rows = DEFAULT_ROW;
 
-                // Check if there are winSize in a row.
-                if (count >= winSize) {
-                    // Return color of the winner
-                    return field[row][column];
-                }
-            }
-        }
-        // Otherwise return c character, which means nobody win in rows.
-        return 'c';
-    }
-    
-    // Check columns, if there are 4 or more disks of the same color - return winner color
-    private static char getWinnerInColumns() {
-        // Check rows and see if there are 4 disks of the same color
-        for (int column = 0; column < field.length; ++column) {
-            int count = 1;
-            // We will compare current element with the previous
-            for (int row = 1; row < field.length; ++row) {
-                if (field[row][column] != 'c' &&
-                    field[row][column] == field[row-1][column])
-                    ++count;
-                else
-                    count = 1;
-		
-                // Check if there are 4 in a row.
-                if (count >= winSize) {
-                    // Return color of the winner
-                    return field[row][column];
-                }
-            }
-        }
-        // Otherwise return 'c' character, which means nobody win in rows.
-        return 'c';
-    }
-    
-    // Check diagonals, if there are 4 or more disks of the same color - return winner color
-    private static char getWinnerInDiagonals() {
-        // There are 2 kinds of diagonals, let's check those that go from top-left to bottom right
+	if(winSize > 0 && winSize <= columns && winSize <= rows)
+	    this.winSize = winSize;
+	else
+	    this.winSize = DEFAULT_WIN;
 	
-        // There are diagonals, that starts on top of each column, let's check them
-        for (int column = 0; column < field.length; ++column) {
-            int count = 0;
-            // Traverse diagonal that starts at [0][column], we start with the first row,
-            // because we will compare elements with the previous one, similar to how
-            // we did this for rows and columns
-            for (int row = 1; row < field.length; ++row) {
-                // Coordinates an the diagonal change as [row + i][column + i], 
-                // so we stop when column can get outside of the range
-                if (column + row >= field.length) break;
-                if (field[row][column+row] != 'c' &&
-                    field[row-1][column + row - 1] == field[row][column+row])
-                    ++count;
-                else
-                    count = 1;
-                if (count >= winSize) return field[row][column+row];
-            }
-        }
+	board = new char[rows][columns];
+	clear();
+	print();
+	
+	System.out.println(columns);
+	System.out.println(rows);
+	System.out.println(winSize);
+    }
 
-        // There are diagonals, that starts on left of each row, let's check them
-        for (int row = 0; row < field.length; ++row) {
-            int count = 0;
-            // Traverse diagonal that starts at [row][0], we start with the first column,
-            // because we will compare elements with the previous one, similar to how
-            // we did this for rows and columns
-            for (int column = 1; column < field.length; ++column) {
-                // Coordinates an the diagonal change as [row + i][column + i], 
-                // so we stop when column can get outside of the range
-                if (column + row >= field.length) break;
-                if (field[row + column][column] != 'c' &&
-                    field[row+column - 1][column - 1] == field[row + column][column]) {		    
-		    ++count;
-                }
-                    
-                else
-                    count = 1;
-                if (count >= winSize) return field[row + column][column];
-            }
-        }
-	
-        // Now we need to do the same for diagonals that go from top-right to bottom-left
-        // There are diagonals, that starts on top of each column, let's check them
-        for (int column = 0; column < field.length; ++column) {
-            int count = 0;
-            // Traverse diagonal that starts at [0][column], we start with the first row,
-            // because we will compare elements with the previous one, similar to how
-            // we did this for rows and columns
-            for (int row = 1; row < field.length; ++row) {
-                // Coordinates an the diagonal change as [row + i][column + i], 
-                // so we stop when column can get outside of the range
-                if (column - row < 0) break;
-                if (field[row][column-row] != 'c' &&
-                    field[row - 1][column - row + 1] == field[row][column-row])
-                    ++count;
-                else
-                    count = 1;
-                if (count >= winSize) return field[row][column-row];
-            }
-        }
-      
-        
-        // There are diagonals, that starts on left of each row, let's check them
-        for (int row = 0; row < field.length; ++row) {
-            int count = 0;
-            // Traverse diagonal that starts at [row][0], we start with the first column,
-            // because we will compare elements with the previous one, similar to how
-            // we did this for rows and columns
-            for (int column = 1; column < field.length; ++column) {
-                // Coordinates an the diagonal change as [row + i][column + i], 
-                // so we stop when column can get outside of the range
-                if (column + row >= field.length) break;
-                if (field[row+column][field.length - column - 1] != 'c' &&
-                    field[row+column -1][field.length - column] == field[row + column][field.length - column - 1]) {
-                	++count;
-                }
-                    
-                else
-                    count = 1;
-                if (count >= winSize) return field[row + column][column];
-            }
-        }
-	
-        return 'c';
+
+    /**
+     * Clear the board by setting all positions to 
+     * empty.
+     */
+    public void clear() {
+	for(int i = 0; i < rows; i++)
+	    for(int j = 0; j < columns; j++)
+		board[i][j] = EMPTY;
     }
-    
-    public int getRows() {
-	return field.length;
-	}
-    
+
+
+    /**
+     * Return the number of columns.
+     * @return int
+     */
     public int getColumns() {
-	return field.length;
+	return columns;
+    }
+
+
+    /**
+     * Return the number of rows.
+     * @return int
+     */
+    public int getRows() {
+	return rows;
+    }
+
+
+    /**
+     * Use the java random number generator to determine
+     * which player goes first.
+     * If the result is 0, red goes first.
+     * If the result is 1, yellow goes first.
+     * @return char
+     */
+    private char setFirstMove() {
+	Random rand = new Random();
+	int result = Math.abs(rand.nextInt()) % 2;
+	if(result == 0)
+	    return RED;
+	else
+	    return YELLOW;
+    }
+
+
+    public boolean move(int column) {
+	if(makeMove(column)) {
+	    print();
+	    System.out.println("Checking if " + currentMove + " won the game...");
+	    if(gameOver())		
+		System.out.println(currentMove + " wins.");
+	    else
+		switchTurns();
+	} else {
+	    System.out.println("invalid move");
+	}
+	return true;	
+    }
+
+    
+    /**
+     * Make a move given a column.
+     * @param int column
+     * @return boolean
+     */
+    private boolean makeMove(int column) {
+	int result = findPosition(column);
+	System.out.println(result);
+	if(result == -1) { // column is full, illegal move
+	    return false;
+	} else {
+	    board[result][column] = currentMove;
+	    System.out.println(board[result][column]);
+	    return true;
+	}
+    }
+
+
+    /**
+     * Iterate over the column on the board and
+     * find the appropriate position to make a
+     * move.
+     */
+    private int findPosition(int column) {
+	int result = -1;
+	int position = 0;
+	while(position < rows) {
+	    if(board[position][column] == EMPTY)
+	        result++;
+	    position++;
+	}
+	return result;
+    }
+
+
+    /**
+     * Determine if the game is over. This method
+     * will only check if the currentMove is a winner.
+     * @return boolean
+     */
+    public boolean gameOver() {
+	System.out.println(currentMove + " is being checked now...");
+	if(checkColumns()) return true;
+	if(checkRows()) return true;
+	if(checkDiagonals()) return true;
+	return false;
+    }
+
+
+    /**
+     * Check the columns for a winner.
+     * @return boolean
+     */
+    private boolean checkColumns() {
+	for(int i = 0; i < columns; i++) {
+	    int result = 0;
+	    for(int j = 0; j < rows; j++) {
+		if(board[j][i] == currentMove) {		    
+		    result++;
+		    if(result == winSize) return true;				    
+		} else {
+		    if(result == winSize) return true;
+		    result = 0;
+		}		
+	    }
+	} 
+	return false;
+    }
+
+
+    /**
+     * Check the rows for a winner.
+     * @return boolean
+     */
+    private boolean checkRows() {
+	for(int i = 0; i < rows; i++) {
+	    int result = 0;
+	    for(int j = 0; j < columns; j++) {
+		if(board[i][j] == currentMove) {
+		    result++;
+		    if(result == winSize) return true;
+		} else {
+		    if(result == winSize) return true;
+		    result = 0;
+		}
+	    }
+	}
+	return false;
+    }
+
+
+    /**
+     * Check the diagonals for a winner.
+     * @return boolean
+     */
+    private boolean checkDiagonals() {
+	return false;
+    }
+
+    
+    /**
+     * After a move is made, switch currentMove to be 
+     * the player that did not make the move.
+     */
+    private void switchTurns() {
+	if(currentMove == RED)
+	    currentMove = YELLOW;
+	else
+	    currentMove = RED;
+    }
+
+    
+    // print board for testing
+    public void print() {
+	for(int i = 0; i < rows; i++) {
+	    for(int j = 0; j < columns; j++) {
+		System.out.print(board[i][j] + " ");
+		if(j == columns-1) System.out.print('\n');		    
+	    }
+	}
+				 
+    }
+    
+    // testing
+    public static void main(String[] args) {
+	ConnectFourLogic g = new ConnectFourLogic(7, 6, 4);
+	g.move(0);
+	g.move(0);
+	g.move(1);
+	g.move(1);
+	g.move(2);
+	g.move(2);
+	g.move(3);
+	g.move(3);
+	g.move(4);
+	g.move(4);
     }
        
 }

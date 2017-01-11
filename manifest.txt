@@ -1,2 +1,2 @@
-Main-Class: Connect4
+Main-Class: ConnectFour
 
