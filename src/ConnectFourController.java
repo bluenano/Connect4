@@ -36,7 +36,7 @@ public class ConnectFourController{
 
     
 	public boolean makeMove(int column){
-		return game.makeMove(column);
+		return game.move(column);
 	}
 
 
@@ -45,15 +45,7 @@ public class ConnectFourController{
 	 * to display the winner, otherwise update the color in the GUI
 	 */
 	public String isOver(){	    
-	    char flow = game.isOver();
-		if (flow == 'c')
-			return "c";
-		else if (flow == 'R')
-			return "Red";
-		else if (flow == 'Y')
-			return "Yellow";
-		else
-			return "Draw";
+	    return "";
 	}
 
 }

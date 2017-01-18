@@ -2,6 +2,7 @@
  * Sean Schlaefli
  * ConnectFourLogic.java
  * implements the ConnectFour game logic.
+ * Board is implemented rows x columns.
  * compiles
  * working/tested
  */
@@ -20,36 +21,25 @@ public class ConnectFourLogic {
 
     private char currentMove;
     private char[][] board;
-    private int columns;
     private int rows;
+    private int columns;    
     private int winSize;
 
     
     public ConnectFourLogic(int columns, int rows, int winSize) {
 	currentMove = setFirstMove();
 	System.out.println(currentMove);
-	
-	if(columns > 0)
-	    this.columns = columns;
-	else
-	    this.columns = DEFAULT_COL;
-	
-	if(rows > 0)
-	    this.rows = rows;
-	else
-	    this.rows = DEFAULT_ROW;
 
-	if(winSize > 0 && winSize <= columns && winSize <= rows)
-	    this.winSize = winSize;
-	else
-	    this.winSize = DEFAULT_WIN;
-	
+	this.rows = (rows > 0) ? rows : DEFAULT_ROW;
+	this.columns = (columns > 0) ? columns : DEFAULT_COL;
+	this.winSize = (winSize > 0 && winSize <= columns && winSize <= rows) ? winSize : DEFAULT_WIN;
+
 	board = new char[rows][columns];
 	clear();
 	print();
 	
-	System.out.println(columns);
 	System.out.println(rows);
+	System.out.println(columns);
 	System.out.println(winSize);
     }
 
@@ -58,10 +48,20 @@ public class ConnectFourLogic {
      * Clear the board by setting all positions to 
      * empty.
      */
-    public void clear() {
+    private void clear() {
 	for(int i = 0; i < rows; i++)
 	    for(int j = 0; j < columns; j++)
 		board[i][j] = EMPTY;
+    }
+
+
+    
+    /**
+     * Return the number of rows.
+     * @return int
+     */
+    public int getRows() {
+	return rows;
     }
 
 
@@ -75,15 +75,6 @@ public class ConnectFourLogic {
 
 
     /**
-     * Return the number of rows.
-     * @return int
-     */
-    public int getRows() {
-	return rows;
-    }
-
-
-    /**
      * Use the java random number generator to determine
      * which player goes first.
      * If the result is 0, red goes first.
@@ -93,25 +84,29 @@ public class ConnectFourLogic {
     private char setFirstMove() {
 	Random rand = new Random();
 	int result = Math.abs(rand.nextInt()) % 2;
-	if(result == 0)
-	    return RED;
-	else
-	    return YELLOW;
+	return (result == 0) ? RED : YELLOW;
     }
 
 
-    public boolean move(int column) {
-	if(makeMove(column)) {
-	    print();
-	    System.out.println("Checking if " + currentMove + " won the game...");
-	    if(gameOver())		
-		System.out.println(currentMove + " wins.");
-	    else
-		switchTurns();
-	} else {
-	    System.out.println("invalid move");
+    /**
+     * Attempt to make a move at the position given by
+     * @param column. If this is an invalid move, do nothing.     
+     */
+    public void move(int column) {
+	if(column < columns) {
+	    if(makeMove(column)) {		
+		print();		
+		System.out.println("Checking if " + currentMove + " won the game...");		
+		if(gameOver())		
+		    System.out.println(currentMove + " wins.");
+		else {
+		    switchTurns();
+		    System.out.println("hi");
+		}		
+	    } else {
+		System.out.println("invalid move");
+	    }
 	}
-	return true;	
     }
 
     
@@ -130,9 +125,10 @@ public class ConnectFourLogic {
 	    System.out.println(board[result][column]);
 	    return true;
 	}
+	
     }
 
-
+    
     /**
      * Iterate over the column on the board and
      * find the appropriate position to make a
@@ -151,37 +147,30 @@ public class ConnectFourLogic {
 
 
     /**
+     * Determine if the game is a draw.
+     * @return boolean
+     */
+    public boolean isDraw() {
+	bool result = true;
+	for(int i = 0; i < rows; i++) {
+	    for(int j = 0; j < columns; j++) {
+		if(board[i][j] == EMPTY)
+		    result = false;
+
+	    }
+	}
+	return result;
+    }
+
+    
+    /**
      * Determine if the game is over. This method
      * will only check if the currentMove is a winner.
      * @return boolean
      */
     public boolean gameOver() {
 	System.out.println(currentMove + " is being checked now...");
-	if(checkColumns()) return true;
-	if(checkRows()) return true;
-	if(checkDiagonals()) return true;
-	return false;
-    }
-
-
-    /**
-     * Check the columns for a winner.
-     * @return boolean
-     */
-    private boolean checkColumns() {
-	for(int i = 0; i < columns; i++) {
-	    int result = 0;
-	    for(int j = 0; j < rows; j++) {
-		if(board[j][i] == currentMove) {		    
-		    result++;
-		    if(result == winSize) return true;				    
-		} else {
-		    if(result == winSize) return true;
-		    result = 0;
-		}		
-	    }
-	} 
-	return false;
+	return checkRows() || checkColumns() || checkDiagonals();
     }
 
 
@@ -197,7 +186,57 @@ public class ConnectFourLogic {
 		    result++;
 		    if(result == winSize) return true;
 		} else {
+		    result = 0;
+		}
+	    }
+	}
+	return false;
+    }
+ 
+
+    /**
+     * Check the columns for a winner.
+     * @return boolean
+     */
+    private boolean checkColumns() {
+	for(int i = 0; i < columns; i++) {
+	    int result = 0;
+	    for(int j = 0; j < rows; j++) {
+		if(board[j][i] == currentMove) {		    
+		    result++;
+		    if(result == winSize) return true;   
+		} else {
+		    result = 0;
+		}		
+	    }
+	} 
+	return false;
+    }
+
+
+
+    /**
+     * Check the diagonals for a winner.
+     * @return boolean
+     */
+    private boolean checkDiagonals() {
+	return checkTopLeft1() || checkTopLeft2();
+    }
+
+
+    /**
+     * Check the diagonals starting at the top left of the board
+     * going up and across the board to the right.
+     * @return boolean
+     */
+    private boolean checkTopLeft1() {
+	for(int i = 0; i < rows; i++) {
+	    int result = 0;
+	    for(int j = 0; j <= i; j++) {
+		if(board[i-j][j] == currentMove) {
+		    result++;
 		    if(result == winSize) return true;
+		} else {
 		    result = 0;
 		}
 	    }
@@ -207,10 +246,76 @@ public class ConnectFourLogic {
 
 
     /**
-     * Check the diagonals for a winner.
+     * Check the diagonals starting at the top left of the board
+     * going down and across the board to the right.
      * @return boolean
      */
-    private boolean checkDiagonals() {
+    private boolean checkTopLeft2() {
+	for(int i = 0; i < rows; i++) {
+	    int result = 0;
+	    int row = i;
+	    int col = 0;
+	    while(row < rows && col < columns) {
+		if(board[row][col] == currentMove) {
+		    result++;
+		    if(result == winSize) return true;
+		} else {
+		    result = 0;
+		}
+		row++;
+		col++;
+	    }
+	}
+	return false;
+    }
+
+
+    /**
+     * Check the diagonals starting at the top right of the board
+     * going down and across the board to the left.
+     * @return boolean
+     */
+    private boolean checkBottomRight1() {
+	for(int i = 0; i < rows; i++) {
+	    int result = 0;
+	    int row = i;
+	    int col = columns;
+	    while(row < rows && col >= 0) {
+		if(board[row][col] == currentMove) {
+		    result++;
+		    if(result == winSize) return true; 
+		} else {
+		    result = 0;
+		}	       
+		row++;
+		col--;		
+	    }		
+	}
+	return false;
+    }
+
+
+    /**
+     * Check the diagonals starting at the top right of the board 
+     * going up and across the board to the left.
+     * @return boolean
+     */
+    private boolean checkBottomRight2() {
+	for(int i = 0; i < rows; i++) {
+	    int result = 0;
+	    int row = i;
+	    int col = columns;
+	    while(row >= 0 && col < columns) {
+		if(board[row][col] == currentMove) {
+		    result++;
+		    if(result == winSize) return true;
+		} else {
+		    result = 0;
+		}
+		row++;
+		col++;
+	    }
+	}
 	return false;
     }
 
@@ -220,10 +325,7 @@ public class ConnectFourLogic {
      * the player that did not make the move.
      */
     private void switchTurns() {
-	if(currentMove == RED)
-	    currentMove = YELLOW;
-	else
-	    currentMove = RED;
+	currentMove = (currentMove == RED) ? YELLOW : RED;
     }
 
     
@@ -242,15 +344,16 @@ public class ConnectFourLogic {
     public static void main(String[] args) {
 	ConnectFourLogic g = new ConnectFourLogic(7, 6, 4);
 	g.move(0);
-	g.move(0);
 	g.move(1);
 	g.move(1);
 	g.move(2);
 	g.move(2);
 	g.move(3);
+	g.move(2);
 	g.move(3);
 	g.move(4);
-	g.move(4);
+	g.move(3);
+	g.move(3);
     }
        
 }
