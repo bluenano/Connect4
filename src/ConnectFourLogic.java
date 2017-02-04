@@ -11,8 +11,8 @@ import java.util.Random;
 
 public class ConnectFourLogic {
 
-    private final int DEFAULT_COL = 7;
     private final int DEFAULT_ROW = 6;
+    private final int DEFAULT_COL = 7;
     private final int DEFAULT_WIN = 4;
     
     private final char EMPTY = 'e';
@@ -26,7 +26,7 @@ public class ConnectFourLogic {
     private int winSize;
 
     
-    public ConnectFourLogic(int columns, int rows, int winSize) {
+    public ConnectFourLogic(int rows, int columns, int winSize) {
 	currentMove = setFirstMove();
 	System.out.println(currentMove);
 
@@ -36,11 +36,11 @@ public class ConnectFourLogic {
 
 	board = new char[rows][columns];
 	clear();
-	print();
+	//print();
 	
-	System.out.println(rows);
-	System.out.println(columns);
-	System.out.println(winSize);
+	//System.out.println(rows);
+	//System.out.println(columns);
+	//System.out.println(winSize);
     }
 
 
@@ -53,7 +53,6 @@ public class ConnectFourLogic {
 	    for(int j = 0; j < columns; j++)
 		board[i][j] = EMPTY;
     }
-
 
     
     /**
@@ -74,6 +73,15 @@ public class ConnectFourLogic {
     }
 
 
+    /**
+     * Return the current move.
+     * @return char
+     */
+    public char getCurrentMove() {
+	return currentMove;
+    }
+
+    
     /**
      * Use the java random number generator to determine
      * which player goes first.
@@ -99,10 +107,9 @@ public class ConnectFourLogic {
 		System.out.println("Checking if " + currentMove + " won the game...");		
 		if(gameOver())		
 		    System.out.println(currentMove + " wins.");
-		else {
+		else 
 		    switchTurns();
-		    System.out.println("hi");
-		}		
+				
 	    } else {
 		System.out.println("invalid move");
 	    }
@@ -151,15 +158,14 @@ public class ConnectFourLogic {
      * @return boolean
      */
     public boolean isDraw() {
-	bool result = true;
 	for(int i = 0; i < rows; i++) {
 	    for(int j = 0; j < columns; j++) {
 		if(board[i][j] == EMPTY)
-		    result = false;
+		    return false;
 
 	    }
 	}
-	return result;
+	return true;
     }
 
     
@@ -220,7 +226,7 @@ public class ConnectFourLogic {
      * @return boolean
      */
     private boolean checkDiagonals() {
-	return checkTopLeft1() || checkTopLeft2();
+	return checkTopLeft1() || checkTopLeft2() || checkBottomRight1() || checkBottomRight2();
     }
 
 
@@ -229,7 +235,7 @@ public class ConnectFourLogic {
      * going up and across the board to the right.
      * @return boolean
      */
-    private boolean checkTopLeft1() {
+    private boolean checkTopLeft1() {      
 	for(int i = 0; i < rows; i++) {
 	    int result = 0;
 	    for(int j = 0; j <= i; j++) {
@@ -240,12 +246,12 @@ public class ConnectFourLogic {
 		    result = 0;
 		}
 	    }
-	}
-	return false;
+	}       
+	return false;	
     }
 
 
-    /**
+    /*
      * Check the diagonals starting at the top left of the board
      * going down and across the board to the right.
      * @return boolean
@@ -278,8 +284,8 @@ public class ConnectFourLogic {
     private boolean checkBottomRight1() {
 	for(int i = 0; i < rows; i++) {
 	    int result = 0;
-	    int row = i;
-	    int col = columns;
+	    int row = i; 
+	    int col = columns-1;
 	    while(row < rows && col >= 0) {
 		if(board[row][col] == currentMove) {
 		    result++;
@@ -304,7 +310,7 @@ public class ConnectFourLogic {
 	for(int i = 0; i < rows; i++) {
 	    int result = 0;
 	    int row = i;
-	    int col = columns;
+	    int col = columns-1;
 	    while(row >= 0 && col < columns) {
 		if(board[row][col] == currentMove) {
 		    result++;
@@ -342,7 +348,7 @@ public class ConnectFourLogic {
     
     // testing
     public static void main(String[] args) {
-	ConnectFourLogic g = new ConnectFourLogic(7, 6, 4);
+	ConnectFourLogic g = new ConnectFourLogic(6, 7, 4);
 	g.move(0);
 	g.move(1);
 	g.move(1);
