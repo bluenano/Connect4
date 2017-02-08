@@ -226,132 +226,99 @@ public class ConnectFourLogic {
      * @return boolean
      */
     private boolean checkDiagonals() {
-	if(rows == columns || rows > columns) {
-	    return checkDiagonalsByRows();
+	if(rows == columns) {
+	    return checkDiagonalsCase1();
+	} else if (rows > columns) {
+	    return checkDiagonalsCase2();
 	} else {
-	    return checkDiagonalsByColumns();
+	    return checkDiagonalsCase3();
 	}
     }
 
 
-    /**
-     * Check all diagonals on the board by 
-     * iterating through the rows.
-     * @return boolean
-     */
-    private boolean checkDiagonalsByRows() {
-	for(int i = 0; i < rows; i++) {
-	    boolean result;
-	    if(rows == columns) {
-		result = checkLeftRow(i) || checkRightRow(i);
-	    } else {
-		result = checkLeftRowCol(i) || checkRightRowCol(i);
-	    }
-	    if(result) return true;
-	}
+    private boolean checkDiagonalsCase1() {
 	return false;
     }
 
 
-    /**
-     * Check all diagonals on the board by
-     * iterating through the columns.
-     * @return boolean
-     */
-    private boolean checkDiagonalsByColumns() {
+    private boolean checkDiagonalsCase2() {
 	return false;
     }
 
 
-    /**
-     * Check a single diagonal starting at 
-     * @param row and the first column. 
-     */
-    private boolean checkLeftRow(int row) {
-	return checkRowDownRight(row)
-	               ||
-	       checkRowUpRight(row);	
+    private boolean checkDiagonalsCase3() {
+	return false;
     }
 
-
-    private boolean checkRowDownRight(int row) {
+    
+    private boolean checkDownRightDiagonal(int startRow, int startCol,
+					   int endRow, int endCol) {
 	int result = 0;
-	int col = 0;
-	for(int i = row; i < rows; i++) {
-	    if(board[i][col] == currentMove) {
+	while(startRow != endRow && startCol != endCol) {
+	    if(board[startRow][startCol] == currentMove) {
 		result++;
 		if(result == winSize) return true;
 	    } else {
 		result = 0;
 	    }
-	    col++;
+	    startRow++;
+	    startCol++;
 	}
 	return false;
     }
 
     
-    private boolean checkRowUpRight(int row) {
+    private boolean checkUpRightDiagonal(int startRow, int startCol,
+					 int endRow, int endCol) {
+
 	int result = 0;
-	int col = 0;
-	for(int i = row; i >= 0; i--) {
-	    if(board[i][col] == currentMove) {
+	while(startRow != endRow && startCol != endCol) {
+	    if(board[startRow][startCol] == currentMove) {
 		result++;
 		if(result == winSize) return true;
 	    } else {
 		result = 0;
 	    }
-	    col++;
+	    startRow--;
+	    startCol++;
 	}
 	return false;
     }
 
-    
-    private boolean checkRightRow(int row) {
-	return checkDownLeftRow(row)
-	              ||
-	       checkUpLeftRow(row);
-    }
 
+    private boolean checkDownLeftDiagonal(int startRow, int startCol,
+					  int endRow, int endCol) {
 
-    private boolean checkDownLeftRow(int row) {
 	int result = 0;
-	int col = columns-1;
-	for(int i = row; i < rows; i++) {
-	    if(board[i][col] == currentMove) {
+	while(startRow != endRow && startCol != endCol) {
+	    if(board[startRow][startCol] == currentMove) {
 		result++;
 		if(result == winSize) return true;
 	    } else {
 		result = 0;
 	    }
-	    col--;
+	    startRow++;
+	    startCol--;
 	}
 	return false;
     }
 
-    
-    private boolean checkUpLeftRow(int row) {
+
+    private boolean checkUpLeftDiagonal(int startRow, int startCol,
+					int endRow, int endCol) {
 	int result = 0;
-	int col = columns-1;
-	for(int i = row; i >= 0; i--) {
-	    if(board[i][col] == currentMove) {
+	while(startRow != endRow && startCol != endCol) {
+	    if(board[startRow][startCol] == currentMove) {
 		result++;
 		if(result == winSize) return true;
 	    } else {
 		result = 0;
 	    }
+	    startRow--;
+	    startCol--;
 	}
 	return false;
     }
-
-
-    private boolean checkLeftRowCol(int row) {
-	return false;
-    }
-
-    private boolean checkRightRowCol(int row) {
-	return false;
-    }
-
 
     
     /**
@@ -377,16 +344,15 @@ public class ConnectFourLogic {
     // testing
     public static void main(String[] args) {
 	ConnectFourLogic g = new ConnectFourLogic(4, 4, 3);
-	g.move(0);
-	g.move(0);
-	g.move(0);
-	g.move(1);
-	g.move(0);
-	g.move(1);
+	g.move(3);
+	g.move(2);
+	g.move(3);
+	g.move(2);
 	g.move(2);
 	g.move(1);
 	g.move(1);
-	g.move(2);
+	g.move(1);
+	g.move(1);
     }
        
 }
