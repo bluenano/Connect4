@@ -241,7 +241,12 @@ public class ConnectFourLogic {
      */
     private boolean checkDiagonalsByRows() {
 	for(int i = 0; i < rows; i++) {
-	    boolean result = checkLeftRow(i) || checkRightRow(i);
+	    boolean result;
+	    if(rows == columns) {
+		result = checkLeftRow(i) || checkRightRow(i);
+	    } else {
+		result = checkLeftRowCol(i) || checkRightRowCol(i);
+	    }
 	    if(result) return true;
 	}
 	return false;
@@ -263,13 +268,92 @@ public class ConnectFourLogic {
      * @param row and the first column. 
      */
     private boolean checkLeftRow(int row) {
+	return checkRowDownRight(row)
+	               ||
+	       checkRowUpRight(row);	
+    }
+
+
+    private boolean checkRowDownRight(int row) {
 	int result = 0;
-	
+	int col = 0;
+	for(int i = row; i < rows; i++) {
+	    if(board[i][col] == currentMove) {
+		result++;
+		if(result == winSize) return true;
+	    } else {
+		result = 0;
+	    }
+	    col++;
+	}
+	return false;
     }
 
+    
+    private boolean checkRowUpRight(int row) {
+	int result = 0;
+	int col = 0;
+	for(int i = row; i >= 0; i--) {
+	    if(board[i][col] == currentMove) {
+		result++;
+		if(result == winSize) return true;
+	    } else {
+		result = 0;
+	    }
+	    col++;
+	}
+	return false;
+    }
+
+    
     private boolean checkRightRow(int row) {
-
+	return checkDownLeftRow(row)
+	              ||
+	       checkUpLeftRow(row);
     }
+
+
+    private boolean checkDownLeftRow(int row) {
+	int result = 0;
+	int col = columns-1;
+	for(int i = row; i < rows; i++) {
+	    if(board[i][col] == currentMove) {
+		result++;
+		if(result == winSize) return true;
+	    } else {
+		result = 0;
+	    }
+	    col--;
+	}
+	return false;
+    }
+
+    
+    private boolean checkUpLeftRow(int row) {
+	int result = 0;
+	int col = columns-1;
+	for(int i = row; i >= 0; i--) {
+	    if(board[i][col] == currentMove) {
+		result++;
+		if(result == winSize) return true;
+	    } else {
+		result = 0;
+	    }
+	}
+	return false;
+    }
+
+
+    private boolean checkLeftRowCol(int row) {
+	return false;
+    }
+
+    private boolean checkRightRowCol(int row) {
+	return false;
+    }
+
+
+    
     /**
      * After a move is made, switch currentMove to be 
      * the player that did not make the move.
@@ -292,18 +376,17 @@ public class ConnectFourLogic {
     
     // testing
     public static void main(String[] args) {
-	ConnectFourLogic g = new ConnectFourLogic(6, 7, 4);
+	ConnectFourLogic g = new ConnectFourLogic(4, 4, 3);
+	g.move(0);
+	g.move(0);
 	g.move(0);
 	g.move(1);
+	g.move(0);
 	g.move(1);
 	g.move(2);
+	g.move(1);
+	g.move(1);
 	g.move(2);
-	g.move(3);
-	g.move(2);
-	g.move(3);
-	g.move(4);
-	g.move(3);
-	g.move(3);
     }
        
 }
