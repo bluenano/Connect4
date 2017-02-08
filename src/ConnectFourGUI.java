@@ -45,6 +45,7 @@ public class ConnectFourGUI extends Application {
     private Pane discRoot;
     private boolean redMove;
 
+    
     public ConnectFourGUI(ConnectFourController controller){
 	this.controller = controller;
 	columns = controller.getColumns();
@@ -54,6 +55,7 @@ public class ConnectFourGUI extends Application {
 	discRoot = new Pane();
     }    
 
+    
     private Parent createContent() {
 	BorderPane ui = new BorderPane();
 	Pane root = new Pane();	    
@@ -66,6 +68,7 @@ public class ConnectFourGUI extends Application {
 	ui.setRight(makePlayerBox("Player 2", Color.YELLOW));
 	return ui;
     }
+
     
     private Shape makeGrid() {
 	Shape shape = new Rectangle((columns + 1) * TILE_SIZE, (rows + 1) * TILE_SIZE);
@@ -95,6 +98,7 @@ public class ConnectFourGUI extends Application {
 	shape.setEffect(lighting);
 	return shape;
     }
+    
 
     private List<Rectangle> makeColumns() {
 	List<Rectangle> list = new ArrayList<>();
@@ -107,12 +111,17 @@ public class ConnectFourGUI extends Application {
 	    rect.setOnMouseExited(e -> rect.setFill(Color.TRANSPARENT));
 	    final int column = x;
 	    rect.setOnMouseClicked(e -> {
-		    if(controller.makeMove(column)){
+		    if(controller.makeMove(column)) {
 			placeDisc(new Disc(redMove), column);
-			String c = controller.isOver();
 			
-			if (!c.equals("c"))
-			    gameOver(c);
+			if(controller.isOver()) {
+			    gameOver(true);
+			} else if(controller.isDraw()) {
+			    gameOver(false);
+			} else {
+			    switchTurns();
+			}
+
 		    }
 		});
 	    list.add(rect);
@@ -134,6 +143,7 @@ public class ConnectFourGUI extends Application {
 	return display;	    
     }
 
+    
     private Text generateResult(String outcome, Color color){
 	Text result = new Text();
 	result.setText(outcome);
@@ -142,25 +152,27 @@ public class ConnectFourGUI extends Application {
 	return result;
 	    
     }
+    
 
-    private void gameOver(String c) {
+    private void gameOver(boolean result) {
 	final Stage gameOver = new Stage();
 	// blocks all events to other windows
 	gameOver.initModality(Modality.APPLICATION_MODAL);
-	Text result = new Text();
-	if (!c.equals("Draw")){
-	    if(c.equals("Red")){	
-		result = generateResult("Player 1 has won the game.", Color.RED);
+	Text display = new Text();
+
+	if(result) {
+	    if(redMove) {
+		display = generateResult("Red won the game.", Color.RED);
+	    } else {
+		display = generateResult("Yellow won the game.", Color.YELLOW);
 	    }
-	    else{
-		result = generateResult("Player 2 has won the game.", Color.YELLOW);
-	    }
-	} else{
-	    result = generateResult("The game ended in a " + c + ".", Color.WHITE);
+	} else {
+	    display = generateResult("The game ended in a draw.", Color.WHITE);
 	}
+	
 	VBox dialog = new VBox();
 	dialog.setAlignment(Pos.CENTER);
-	dialog.getChildren().add(result);
+	dialog.getChildren().add(display);
 	BackgroundFill fill = new BackgroundFill(Color.BLACK, null, null);
 	dialog.setBackground(new Background(fill));
 	Scene dialogScene = new Scene(dialog, 300, 200);
@@ -183,12 +195,17 @@ public class ConnectFourGUI extends Application {
 	
 	grid[column][row] = disc;
 	discRoot.getChildren().add(disc);
-	redMove = !redMove;
 	disc.setTranslateX(column * (TILE_SIZE + 5) + TILE_SIZE / 4);
 	TranslateTransition animation = new TranslateTransition(Duration.seconds(0.5), disc);
 	animation.setToY(row * (TILE_SIZE + 5) + TILE_SIZE / 4);
 	animation.play();
     }
+
+
+    private void switchTurns() {
+	redMove = (redMove) ? false : true;
+    }
+
     
     private Optional<Disc> getDisc(int inputColumn, int inputRow) {
 	if (inputColumn < 0 || inputColumn >= columns
@@ -197,6 +214,7 @@ public class ConnectFourGUI extends Application {
 	
 	return Optional.ofNullable(grid[inputColumn][inputRow]);
     }
+
     
     private static class Disc extends Circle {
 	private final boolean red;

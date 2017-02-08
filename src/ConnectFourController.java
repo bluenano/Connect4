@@ -9,43 +9,48 @@
 
 public class ConnectFourController{
 
-	private ConnectFourLogic game;
-	private ConnectFourGUI view;
-	
-	public ConnectFourController(ConnectFourLogic game){
-		this.game = game;
-	}
-
-
-	/**
-	 * Attach the GUI to the view
-	 * @param ConnectFourGUI view
-	 */
-	public void attachView(ConnectFourGUI view){
-		this.view = view;
-	}
-
-
-	public int getRows(){
-		return game.getRows();
-	}
-
-	public int getColumns(){
-		return game.getColumns();
-	}
-
+    private ConnectFourLogic game;
+    private ConnectFourGUI view;
     
-	public boolean makeMove(int column){
-		return game.move(column);
-	}
+    public ConnectFourController(ConnectFourLogic game){
+	this.game = game;
+    }
+    
+    
+    /**
+     * Attach the GUI to the view
+     * @param ConnectFourGUI view
+     */
+    public void attachView(ConnectFourGUI view){
+	this.view = view;
+    }
+    
+    
+    public int getRows(){
+	return game.getRows();
+    }
+    
+    public int getColumns(){
+	return game.getColumns();
+    }
+    
+    
+    public boolean makeMove(int column){
+	return game.makeMove(column);
+    }
+    
+    
+    /**
+     * check the game logic for a winner, if true return to the GUI 
+     * to display the winner, otherwise update the color in the GUI
+     */
+    public boolean isOver(){	    
+	return game.gameOver();
+    }
 
-
-	/**
-	 * check the game logic for a winner, if true return to the GUI 
-	 * to display the winner, otherwise update the color in the GUI
-	 */
-	public String isOver(){	    
-	    return "";
-	}
+    public boolean isDraw() {
+	return game.isDraw();
+    }
+    
 
 }

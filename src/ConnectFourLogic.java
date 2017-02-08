@@ -28,7 +28,7 @@ public class ConnectFourLogic {
     
     public ConnectFourLogic(int rows, int columns, int winSize) {
 	currentMove = setFirstMove();
-	System.out.println(currentMove);
+	//System.out.println(currentMove);
 
 	this.rows = (rows > 0) ? rows : DEFAULT_ROW;
 	this.columns = (columns > 0) ? columns : DEFAULT_COL;
@@ -122,14 +122,14 @@ public class ConnectFourLogic {
      * @param int column
      * @return boolean
      */
-    private boolean makeMove(int column) {
+    public boolean makeMove(int column) {
 	int result = findPosition(column);
-	System.out.println(result);
+	//System.out.println(result);
 	if(result == -1) { // column is full, illegal move
 	    return false;
 	} else {
 	    board[result][column] = currentMove;
-	    System.out.println(board[result][column]);
+	    //System.out.println(board[result][column]);
 	    return true;
 	}
 	
@@ -154,17 +154,15 @@ public class ConnectFourLogic {
 
 
     /**
-     * Determine if the game is a draw.
+     * Determine if the game is a draw by 
+     * checking the top row.
      * @return boolean
      */
     public boolean isDraw() {
-	for(int i = 0; i < rows; i++) {
-	    for(int j = 0; j < columns; j++) {
-		if(board[i][j] == EMPTY)
-		    return false;
-
-	    }
-	}
+	for(int i = 0; i < columns; i++) {
+	    if(board[0][i] == EMPTY)
+		return false;
+	}	
 	return true;
     }
 
@@ -175,7 +173,7 @@ public class ConnectFourLogic {
      * @return boolean
      */
     public boolean gameOver() {
-	System.out.println(currentMove + " is being checked now...");
+	//System.out.println(currentMove + " is being checked now...");
 	return checkRows() || checkColumns() || checkDiagonals();
     }
 
@@ -222,110 +220,56 @@ public class ConnectFourLogic {
 
 
     /**
-     * Check the diagonals for a winner.
+     * Check the diagonals for a winner. The
+     * algorithm will be different depending on
+     * the dimensions of the board.
      * @return boolean
      */
     private boolean checkDiagonals() {
-	return checkTopLeft1() || checkTopLeft2() || checkBottomRight1() || checkBottomRight2();
+	if(rows == columns || rows > columns) {
+	    return checkDiagonalsByRows();
+	} else {
+	    return checkDiagonalsByColumns();
+	}
     }
 
 
     /**
-     * Check the diagonals starting at the top left of the board
-     * going up and across the board to the right.
+     * Check all diagonals on the board by 
+     * iterating through the rows.
      * @return boolean
      */
-    private boolean checkTopLeft1() {      
+    private boolean checkDiagonalsByRows() {
 	for(int i = 0; i < rows; i++) {
-	    int result = 0;
-	    for(int j = 0; j <= i; j++) {
-		if(board[i-j][j] == currentMove) {
-		    result++;
-		    if(result == winSize) return true;
-		} else {
-		    result = 0;
-		}
-	    }
-	}       
-	return false;	
-    }
-
-
-    /*
-     * Check the diagonals starting at the top left of the board
-     * going down and across the board to the right.
-     * @return boolean
-     */
-    private boolean checkTopLeft2() {
-	for(int i = 0; i < rows; i++) {
-	    int result = 0;
-	    int row = i;
-	    int col = 0;
-	    while(row < rows && col < columns) {
-		if(board[row][col] == currentMove) {
-		    result++;
-		    if(result == winSize) return true;
-		} else {
-		    result = 0;
-		}
-		row++;
-		col++;
-	    }
+	    boolean result = checkLeftRow(i) || checkRightRow(i);
+	    if(result) return true;
 	}
 	return false;
     }
 
 
     /**
-     * Check the diagonals starting at the top right of the board
-     * going down and across the board to the left.
+     * Check all diagonals on the board by
+     * iterating through the columns.
      * @return boolean
      */
-    private boolean checkBottomRight1() {
-	for(int i = 0; i < rows; i++) {
-	    int result = 0;
-	    int row = i; 
-	    int col = columns-1;
-	    while(row < rows && col >= 0) {
-		if(board[row][col] == currentMove) {
-		    result++;
-		    if(result == winSize) return true; 
-		} else {
-		    result = 0;
-		}	       
-		row++;
-		col--;		
-	    }		
-	}
+    private boolean checkDiagonalsByColumns() {
 	return false;
     }
 
 
     /**
-     * Check the diagonals starting at the top right of the board 
-     * going up and across the board to the left.
-     * @return boolean
+     * Check a single diagonal starting at 
+     * @param row and the first column. 
      */
-    private boolean checkBottomRight2() {
-	for(int i = 0; i < rows; i++) {
-	    int result = 0;
-	    int row = i;
-	    int col = columns-1;
-	    while(row >= 0 && col < columns) {
-		if(board[row][col] == currentMove) {
-		    result++;
-		    if(result == winSize) return true;
-		} else {
-		    result = 0;
-		}
-		row++;
-		col++;
-	    }
-	}
-	return false;
+    private boolean checkLeftRow(int row) {
+	int result = 0;
+	
     }
 
-    
+    private boolean checkRightRow(int row) {
+
+    }
     /**
      * After a move is made, switch currentMove to be 
      * the player that did not make the move.
