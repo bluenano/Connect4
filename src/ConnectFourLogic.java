@@ -118,21 +118,18 @@ public class ConnectFourLogic {
 
     
     /**
-     * Make a move given a column.
+     * Make a move given a column.    
      * @param int column
      * @return boolean
      */
     public boolean makeMove(int column) {
 	int result = findPosition(column);
-	//System.out.println(result);
 	if(result == -1) { // column is full, illegal move
 	    return false;
 	} else {
 	    board[result][column] = currentMove;
-	    //System.out.println(board[result][column]);
 	    return true;
-	}
-	
+	}	
     }
 
     
@@ -186,7 +183,7 @@ public class ConnectFourLogic {
 	for(int i = 0; i < rows; i++) {
 	    int result = 0;
 	    for(int j = 0; j < columns; j++) {
-		if(board[i][j] == currentMove) {
+	if(board[i][j] == currentMove) {
 		    result++;
 		    if(result == winSize) return true;
 		} else {
@@ -236,25 +233,109 @@ public class ConnectFourLogic {
     }
 
 
+    /**
+     * Check all diagonals of a square board.
+     * @return boolean
+     */
     private boolean checkDiagonalsCase1() {
-	return false;
+	boolean result = false;
+	for(int i = 0; i < rows; i++) {
+	    result =
+		checkDownRightDiagonal(i, 0, rows-1, columns-1-i)
+		||
+		checkUpRightDiagonal(i, 0, 0, i)
+		||
+		checkDownLeftDiagonal(i, rows-1, rows-1, i)
+		||
+		checkUpLeftDiagonal(i, columns-1, 0, columns-1-i);
+	    if(result) return result;
+	}
+	return result;
     }
 
 
+    /**
+     * Check all diagonals of a board with more rows
+     * than columns. This logic may be confusing, but
+     * can be explained by analyzing different scenarios
+     * based on the size of each dimension.
+     * @return boolean
+     */
     private boolean checkDiagonalsCase2() {
-	return false;
+	boolean result = false;	
+	for(int i = 0; i < rows; i++) {
+	    // calculate all ending row, column combinations
+	    int rowPos1 = (i+columns-1 > rows-1) ? rows-1 : i+columns-1;
+	    int colPos1 = (i > columns-1) ? columns-i : columns-1;
+	    int rowPos2 = (i > columns-1) ? i-columns-1 : 0;
+	    int colPos2 = (i < columns-1) ? i : columns-1;
+	    int rowPos3 = (i < columns-1) ? i+columns-1 : rows-1;
+	    int colPos3 = (i > columns-1) ? columns-i+1 : columns-1;
+	    int rowPos4 = (i > columns-1) ? i-columns+1 : 0;
+	    int colPos4 = (i < columns-1) ? columns-1-i: 0;		
+
+	    result =
+		checkDownRightDiagonal(i, 0, rowPos1, colPos1)
+		||
+		checkUpRightDiagonal(i, 0, rowPos2, colPos2)
+		||
+	        checkDownLeftDiagonal(i, columns-1, rowPos3, colPos3)
+		||
+		checkUpLeftDiagonal(i, columns-1, rowPos4, colPos4);
+	    
+	    if(result) return result;
+	}
+	return result;
     }
 
 
+    /**
+     * Check all diagonals of a board with less rows
+     * than columns.
+     * @return boolean
+     */
     private boolean checkDiagonalsCase3() {
-	return false;
+	boolean result = false;
+	for(int i = 0; i < columns; i++) {
+	    // calculate all ending row, column combinations
+	    int rowPos1 = (i < rows-1) ? rows-1 : rows-i;
+	    int colPos1 = (i+rows-1 < columns-1) ? i+rows-1 : columns-1;
+	    int rowPos2 = (i+rows-1 > columns-1) ? (i+rows-1)-(columns-1) : 0;
+	    int colPos2 = (i+rows-1 < columns-1) ? i+rows-1 : columns-1;
+	    int rowPos3 = (i < rows) ? i : rows-1 ;
+	    int colPos3 = (i > rows-1) ? i-rows+1 : 0;
+	    int rowPos4 = (i < rows-1) ? rows-1-i : 0;
+	    int colPos4 = (i > rows-1) ? i-rows-1 : 0;
+	    result =
+		checkDownRightDiagonal(0, i, rowPos1, colPos1)
+		||
+		checkUpRightDiagonal(rows-1, i, rowPos2, colPos2)
+		||
+		checkDownLeftDiagonal(0, i, rowPos3, colPos3)
+		||
+		checkUpLeftDiagonal(rows-1, i, rowPos4, colPos4);
+	    
+	    
+	    if(result) return true;
+	}
+	return result;
     }
 
-    
+
+    /**
+     * Check a diagonal where startRow, startCol is above
+     * and to the left of endRow, endCol.
+     * precondition: startRow < endRow, startCol < endCol
+     * @param startRow the row to start at
+     * @param startCol the column to start at
+     * @param endRow the row to end at
+     * @param endCol the column to end at
+     * @return boolean
+     */
     private boolean checkDownRightDiagonal(int startRow, int startCol,
 					   int endRow, int endCol) {
 	int result = 0;
-	while(startRow != endRow && startCol != endCol) {
+	while(startRow <= endRow && startCol <= endCol) {
 	    if(board[startRow][startCol] == currentMove) {
 		result++;
 		if(result == winSize) return true;
@@ -267,12 +348,21 @@ public class ConnectFourLogic {
 	return false;
     }
 
-    
+    /**
+     * Check a diagonal where startRow, startCol is below
+     * and to the left of endRow, endCol.
+     * precondition: startRow > endRow, startCol < endCol
+     * @param startRow the row to start at
+     * @param startCol the column to start at
+     * @param endRow the row to end at
+     * @param endCol the column to end at
+     * @return boolean
+     */
     private boolean checkUpRightDiagonal(int startRow, int startCol,
 					 int endRow, int endCol) {
 
 	int result = 0;
-	while(startRow != endRow && startCol != endCol) {
+	while(startRow >= endRow && startCol <= endCol) {
 	    if(board[startRow][startCol] == currentMove) {
 		result++;
 		if(result == winSize) return true;
@@ -285,12 +375,22 @@ public class ConnectFourLogic {
 	return false;
     }
 
-
+    
+    /**
+     * Check a diagonal where startRow, startCol is above
+     * and to the right of endRow, endCol.
+     * precondition: startRow < endRow, startCol > endCol
+     * @param startRow the row to start at
+     * @param startCol the column to start at
+     * @param endRow the row to end at
+     * @param endCol the column to end at
+     * @return boolean
+     */
     private boolean checkDownLeftDiagonal(int startRow, int startCol,
 					  int endRow, int endCol) {
 
 	int result = 0;
-	while(startRow != endRow && startCol != endCol) {
+	while(startRow <= endRow && startCol >= endCol) {
 	    if(board[startRow][startCol] == currentMove) {
 		result++;
 		if(result == winSize) return true;
@@ -303,11 +403,21 @@ public class ConnectFourLogic {
 	return false;
     }
 
-
+    
+    /**
+     * Check a diagonal where startRow, startCol is below
+     * and to the right of endRow, endCol.
+     * precondition: startRow > endRow, startCol > endCol
+     * @param startRow the row to start at
+     * @param startCol the column to start at
+     * @param endRow the row to end at
+     * @param endCol the column to end at
+     * @return boolean
+     */
     private boolean checkUpLeftDiagonal(int startRow, int startCol,
 					int endRow, int endCol) {
 	int result = 0;
-	while(startRow != endRow && startCol != endCol) {
+	while(startRow >= endRow && startCol >= endCol) {
 	    if(board[startRow][startCol] == currentMove) {
 		result++;
 		if(result == winSize) return true;
@@ -343,16 +453,14 @@ public class ConnectFourLogic {
     
     // testing
     public static void main(String[] args) {
-	ConnectFourLogic g = new ConnectFourLogic(4, 4, 3);
-	g.move(3);
-	g.move(2);
-	g.move(3);
-	g.move(2);
+	ConnectFourLogic g = new ConnectFourLogic(3, 4, 3);
 	g.move(2);
 	g.move(1);
 	g.move(1);
-	g.move(1);
-	g.move(1);
+	g.move(2);
+	g.move(0);
+	g.move(0);
+	g.move(0);
     }
        
 }
