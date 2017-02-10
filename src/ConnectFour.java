@@ -32,8 +32,11 @@ public class ConnectFour extends Application{
     
     @Override
     public void start(Stage primaryStage) throws Exception {
-	ConnectFourLogic g = new ConnectFourLogic(columns, rows, winSize);
-	ConnectFourGUI app = new ConnectFourGUI(new ConnectFourController(g));
+	ConnectFourLogic game = new ConnectFourLogic(rows, columns, winSize);
+	ConnectFourController controller = new ConnectFourController(game);
+        ConnectFourSetup setup = new ConnectFourSetup(controller);
+	setup.start(primaryStage);
+	ConnectFourGUI app = new ConnectFourGUI(controller);
 	app.start(primaryStage);
     }
     

@@ -48,9 +48,10 @@ public class ConnectFourGUI extends Application {
     
     public ConnectFourGUI(ConnectFourController controller){
 	this.controller = controller;
+	controller.attachView(this);
 	columns = controller.getColumns();
 	rows = controller.getRows();
-	redMove = true;
+	redMove = controller.getCurrentMove();;
 	grid = new Disc[columns][rows];
 	discRoot = new Pane();
     }    
@@ -110,16 +111,18 @@ public class ConnectFourGUI extends Application {
 	    rect.setOnMouseEntered(e -> rect.setFill(Color.rgb(200, 200, 50, 0.3)));
 	    rect.setOnMouseExited(e -> rect.setFill(Color.TRANSPARENT));
 	    final int column = x;
+	    
 	    rect.setOnMouseClicked(e -> {
-		    if(controller.makeMove(column)) {
+		    if(controller.verify(column)) {
+			controller.makeMove(column);
 			placeDisc(new Disc(redMove), column);
-			
+
 			if(controller.isOver()) {
 			    gameOver(true);
 			} else if(controller.isDraw()) {
 			    gameOver(false);
 			} else {
-			    switchTurns();
+			    controller.switchTurns();
 			}
 
 		    }
@@ -202,7 +205,7 @@ public class ConnectFourGUI extends Application {
     }
 
 
-    private void switchTurns() {
+    public void switchTurns() {
 	redMove = (redMove) ? false : true;
     }
 

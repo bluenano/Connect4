@@ -34,6 +34,7 @@ public class TestLogic {
 	    option = args[0];
 	    if(option.equals("-t")) {	    
 		Scanner cin = new Scanner(System.in);
+		System.out.print("Enter file name: ");
 		file = cin.nextLine();
 		initiateTest(file);
 	    }	    
@@ -44,7 +45,7 @@ public class TestLogic {
 		initiateTest(file);
 	    }
 	} else {
-	    System.out.println("Use command line arguments.");
+	    System.out.println("Command line arguments required.");
 	}
     }
 
@@ -131,9 +132,7 @@ public class TestLogic {
 	public void run() {
 	    System.out.println(game);
 	    processGame(game);
-	    System.out.println("Counting down!");
 	    control.countDown();
-	    System.out.println("latches available: " + control.getCount());
 	}
 
 
@@ -159,7 +158,7 @@ public class TestLogic {
 
 		while(readGame.hasNextInt()) {
 		    int move = readGame.nextInt();
-		    g.move(move);
+		    g.makeMove(move);
 
 		    if(g.gameOver()) {
 			System.out.println("Game over, " + g.getCurrentMove() + " won the game.");

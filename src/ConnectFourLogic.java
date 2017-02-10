@@ -28,7 +28,6 @@ public class ConnectFourLogic {
     
     public ConnectFourLogic(int rows, int columns, int winSize) {
 	currentMove = setFirstMove();
-	//System.out.println(currentMove);
 
 	this.rows = (rows > 0) ? rows : DEFAULT_ROW;
 	this.columns = (columns > 0) ? columns : DEFAULT_COL;
@@ -36,11 +35,6 @@ public class ConnectFourLogic {
 
 	board = new char[rows][columns];
 	clear();
-	//print();
-	
-	//System.out.println(rows);
-	//System.out.println(columns);
-	//System.out.println(winSize);
     }
 
 
@@ -102,8 +96,9 @@ public class ConnectFourLogic {
      */
     public void move(int column) {
 	if(column < columns) {
-	    if(makeMove(column)) {		
-		print();		
+	    if(verifyMove(column)) {
+		makeMove(column);
+		System.out.println(toString());
 		System.out.println("Checking if " + currentMove + " won the game...");		
 		if(gameOver())		
 		    System.out.println(currentMove + " wins.");
@@ -116,20 +111,27 @@ public class ConnectFourLogic {
 	}
     }
 
+
+    /**
+     * Verify that there's a valid move available in the
+     * given column.
+     * @param int column the column to check
+     */
+    public boolean verifyMove(int column) {
+	return board[0][column] == EMPTY;
+    }
+
     
     /**
      * Make a move given a column.    
      * @param int column
      * @return boolean
      */
-    public boolean makeMove(int column) {
-	int result = findPosition(column);
-	if(result == -1) { // column is full, illegal move
-	    return false;
-	} else {
+    public void makeMove(int column) {
+	if(verifyMove(column)) {
+	    int result = findPosition(column);
 	    board[result][column] = currentMove;
-	    return true;
-	}	
+	}
     }
 
     
@@ -170,7 +172,6 @@ public class ConnectFourLogic {
      * @return boolean
      */
     public boolean gameOver() {
-	//System.out.println(currentMove + " is being checked now...");
 	return checkRows() || checkColumns() || checkDiagonals();
     }
 
@@ -435,7 +436,7 @@ public class ConnectFourLogic {
      * After a move is made, switch currentMove to be 
      * the player that did not make the move.
      */
-    private void switchTurns() {
+    public void switchTurns() {
 	currentMove = (currentMove == RED) ? YELLOW : RED;
     }
 
@@ -450,6 +451,23 @@ public class ConnectFourLogic {
 	}
 				 
     }
+
+
+    // to string representation of the game board
+    // could use string builder but don't see an issue
+    // with allocating new references at each iteration
+    // on such a small scale
+    public String toString() {
+	String result = "";
+	for(int i = 0; i < rows; i++) {
+	    for(int j = 0; j < columns; j++) {
+		result += board[i][j] + " ";
+		if(j == columns-1) result += "\n";
+	    }
+	}
+	return result;
+    }
+
     
     // testing
     public static void main(String[] args) {
