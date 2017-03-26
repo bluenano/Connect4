@@ -1,6 +1,6 @@
 /**
  * Sean Schlaefli
- * ConnectFourGUI.java
+ * Connect4GUI.java
  * GUI implementation to represent the ConnectFour game
  * compiles
  * working/tested
@@ -34,19 +34,19 @@ import javafx.stage.Stage;
 import javafx.util.Duration;
 import javafx.scene.control.Label;
 
-public class ConnectFourGUI extends Application {
+public class Connect4GUI extends Application {
 
 
     private static final int TILE_SIZE = 80;
     private static int columns;
     private static int rows;
-    private ConnectFourController controller;
+    private Connect4Controller controller;
     private Disc[][] grid;
     private Pane discRoot;
     private boolean redMove;
 
     
-    public ConnectFourGUI(ConnectFourController controller){
+    public Connect4GUI(Connect4Controller controller){
 	this.controller = controller;
 	controller.attachView(this);
 	columns = controller.getColumns();
@@ -234,7 +234,7 @@ public class ConnectFourGUI extends Application {
     @Override
     public void start(Stage stage) throws Exception {
 	stage.setScene(new Scene(createContent()));
-	stage.setTitle("ConnectFour");
+	stage.setTitle("Connect4");
 	stage.show();
     }
     

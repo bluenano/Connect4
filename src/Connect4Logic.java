@@ -9,7 +9,7 @@
 
 import java.util.Random;
 
-public class ConnectFourLogic {
+public class Connect4Logic {
 
     private final int DEFAULT_ROW = 6;
     private final int DEFAULT_COL = 7;
@@ -26,7 +26,7 @@ public class ConnectFourLogic {
     private int winSize;
 
     
-    public ConnectFourLogic(int rows, int columns, int winSize) {
+    public Connect4Logic(int rows, int columns, int winSize) {
 	currentMove = setFirstMove();
 
 	this.rows = (rows > 0) ? rows : DEFAULT_ROW;
@@ -471,7 +471,7 @@ public class ConnectFourLogic {
     
     // testing
     public static void main(String[] args) {
-	ConnectFourLogic g = new ConnectFourLogic(3, 4, 3);
+	Connect4Logic g = new Connect4Logic(3, 4, 3);
 	g.move(2);
 	g.move(1);
 	g.move(1);

@@ -7,13 +7,13 @@
  * working/tested
  */
 
-public class ConnectFourController{
+public class Connect4Controller{
 
-    private ConnectFourLogic game;
-    private ConnectFourGUI view;
+    private Connect4Logic game;
+    private Connect4GUI view;
     private final char RED = 'r';
     private final char YELLOW = 'y';
-    public ConnectFourController(ConnectFourLogic game){
+    public Connect4Controller(Connect4Logic game){
 	this.game = game;
 	
     }
@@ -23,7 +23,7 @@ public class ConnectFourController{
      * Attach the GUI to the view
      * @param ConnectFourGUI view
      */
-    public void attachView(ConnectFourGUI view){
+    public void attachView(Connect4GUI view){
 	this.view = view;
     }
     

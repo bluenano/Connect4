@@ -10,7 +10,7 @@
 import javafx.application.Application;
 import javafx.stage.Stage;
 
-public class ConnectFour extends Application{
+public class Connect4 extends Application{
 
     public static int columns;
     public static int rows;
@@ -32,11 +32,11 @@ public class ConnectFour extends Application{
     
     @Override
     public void start(Stage primaryStage) throws Exception {
-	ConnectFourLogic game = new ConnectFourLogic(rows, columns, winSize);
-	ConnectFourController controller = new ConnectFourController(game);
-        ConnectFourSetup setup = new ConnectFourSetup(controller);
+	Connect4Logic game = new Connect4Logic(rows, columns, winSize);
+	Connect4Controller controller = new Connect4Controller(game);
+        Connect4Setup setup = new Connect4Setup(controller);
 	setup.start(primaryStage);
-	ConnectFourGUI app = new ConnectFourGUI(controller);
+	Connect4GUI app = new Connect4GUI(controller);
 	app.start(primaryStage);
     }
     

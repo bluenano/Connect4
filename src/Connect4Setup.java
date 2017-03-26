@@ -7,11 +7,11 @@ import javafx.scene.control.Button;
 import javafx.stage.Stage;
 
 
-public class ConnectFourSetup extends Application {
+public class Connect4Setup extends Application {
 
-    private ConnectFourController controller;
+    private Connect4Controller controller;
 
-    public ConnectFourSetup(ConnectFourController controller) {
+    public Connect4Setup(Connect4Controller controller) {
 	this.controller = controller;
     }
 
