@@ -13,9 +13,9 @@ public class Connect4Controller{
     private Connect4GUI view;
     private final char RED = 'r';
     private final char YELLOW = 'y';
+
     public Connect4Controller(Connect4Logic game){
-	this.game = game;
-	
+	this.game = game;	
     }
     
     
