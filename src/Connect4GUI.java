@@ -44,6 +44,8 @@ public class Connect4GUI extends Application {
     private BorderPane layout;
     private Group gridRoot;
     private ArrayList<Rectangle> columns;
+    private Circle redIndicator;
+    private Circle yellowIndicator;
     
     
     public Connect4GUI(Connect4Controller controller){
@@ -57,6 +59,7 @@ public class Connect4GUI extends Application {
     
     public Scene createGameUI() {
 	initializeElements();
+	setupMoveIndicator();
 	setupGrid();
 	setupLayout();
 	return new Scene(layout, 2 * BOX_WIDTH + TILE_SIZE * columnSize, 650);
@@ -69,6 +72,30 @@ public class Connect4GUI extends Application {
 	columns = new ArrayList<Rectangle>();
     }
 
+
+    private void setupMoveIndicator() {
+	redIndicator = createIndicator();       
+	yellowIndicator = createIndicator();
+	setIndicatorFill();
+    }
+
+
+    private Circle createIndicator() {
+	return new Circle(BOX_WIDTH / 5);
+    }
+
+    
+    private void setIndicatorFill() {
+	if (redMove) {
+	    redIndicator.setFill(Color.RED);
+	    yellowIndicator.setFill(Color.BLACK);
+	} else {
+	    redIndicator.setFill(Color.BLACK);
+	    yellowIndicator.setFill(Color.YELLOW);
+	}
+    }
+
+    
     private void setupGrid() {
 	gridRoot.prefWidth(TILE_SIZE * columnSize);
 	gridRoot.prefHeight(TILE_SIZE * rowSize);
@@ -79,9 +106,13 @@ public class Connect4GUI extends Application {
 
     
     private void setupLayout() {
+	Pane red = createPlayerBox("Player 1", Color.RED);
+	Pane yellow = createPlayerBox("Player 2", Color.YELLOW);
+	red.getChildren().add(redIndicator);
+	yellow.getChildren().add(yellowIndicator);
 	layout.setCenter(gridRoot);
-	layout.setLeft(createPlayerBox("Player 1", Color.RED));
-	layout.setRight(createPlayerBox("Player 2", Color.YELLOW));
+	layout.setLeft(red);
+	layout.setRight(yellow);
     }
     
     
@@ -89,7 +120,7 @@ public class Connect4GUI extends Application {
 	Shape grid = new Rectangle(columnSize * TILE_SIZE, rowSize * TILE_SIZE);
 	for (int x = 0; x < columnSize; x++) {
 	    for (int y = 0; y < rowSize; y++) {
-		grid = Shape.subtract(grid, createCircle(x,y, Color.WHITE));
+		grid = Shape.subtract(grid, createGridCircle(x,y, Color.WHITE));
 	    }
 	}
 	grid.setFill(Color.BLUE);
@@ -109,7 +140,7 @@ public class Connect4GUI extends Application {
     }
 
     
-    private Circle createCircle(int x, int y, Color color) {
+    private Circle createGridCircle(int x, int y, Color color) {
 	Circle circle = new Circle(TILE_SIZE / 3);
 	circle.setCenterX(x * TILE_SIZE + TILE_SIZE / 2);
 	circle.setCenterY(y * TILE_SIZE + TILE_SIZE / 2);
@@ -151,6 +182,7 @@ public class Connect4GUI extends Application {
 	    } else {
 		switchTurns();
 		controller.switchTurns();
+		setIndicatorFill();
 	    }
 	}
     }
@@ -178,6 +210,7 @@ public class Connect4GUI extends Application {
 	display.setPrefWidth(BOX_WIDTH);
 	display.setPrefHeight(TILE_SIZE * rowSize);
 	display.setAlignment(Pos.BASELINE_CENTER);
+	display.setSpacing(BOX_WIDTH / 4);
 	Text player = new Text(label);
 	player.setFont(new Font(20));
 	player.setFill(color);
