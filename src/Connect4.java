@@ -1,7 +1,7 @@
 /**
  * Sean Schlaefli
- * ConnectFour.java
- * Launches the ConnectFour application.
+ * Connect4.java
+ * Launches the Connect4 application.
  * compiles
  * working/tested
  */

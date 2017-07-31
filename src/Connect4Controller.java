@@ -1,6 +1,6 @@
 /**
  * Sean Schlaefli
- * ConnectFourController.java
+ * Connect4Controller.java
  * Controller to communicate between the GUI and 
  * the game logic.
  * compiles
@@ -14,13 +14,14 @@ public class Connect4Controller{
     private final char RED = 'r';
     private final char YELLOW = 'y';
 
+    
     public Connect4Controller(Connect4Logic game){
 	this.game = game;	
     }
     
     
     /**
-     * Attach the GUI to the view
+     * Attach the GUI to the controller
      * @param ConnectFourGUI view
      */
     public void attachView(Connect4GUI view){
@@ -31,13 +32,14 @@ public class Connect4Controller{
     public int getRows(){
 	return game.getRows();
     }
+
     
     public int getColumns(){
 	return game.getColumns();
     }
     
 
-    public boolean verify(int column) {
+    public boolean verifyMove(int column) {
 	return game.verifyMove(column);
     }
 
@@ -47,27 +49,27 @@ public class Connect4Controller{
     }
 
     
-    public void makeMove(int column){
-	game.makeMove(column);
+    public int makeMove(int column){
+	return game.makeMove(column);
     }
 
 
     public void switchTurns() {
 	game.switchTurns();
-	view.switchTurns();
     }
     
-    /**
-     * check the game logic for a winner, if true return to the GUI 
-     * to display the winner, otherwise update the color in the GUI
-     */
-    public boolean isOver(){	    
+
+    public boolean isGameOver(){	    
 	return game.gameOver();
     }
 
+    
     public boolean isDraw() {
 	return game.isDraw();
     }
     
 
+    public void resetGame() {
+	game.reset();
+    }
 }

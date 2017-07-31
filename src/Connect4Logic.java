@@ -1,12 +1,13 @@
 /**
  * Sean Schlaefli
- * ConnectFourLogic.java
- * implements the ConnectFour game logic.
+ * Connect4Logic.java
+ * implements the Connect4 game logic.
  * Board is implemented rows x columns.
  * compiles
  * working/tested
  */
 
+import java.lang.Integer;
 import java.util.Random;
 
 public class Connect4Logic {
@@ -24,9 +25,8 @@ public class Connect4Logic {
 
     
     public Connect4Logic() {
-	currentMove = setFirstMove();
 	board = new char[ROWS][COLUMNS];
-	clear();
+	reset();
     }
 
 
@@ -38,6 +38,12 @@ public class Connect4Logic {
 	for(int i = 0; i < ROWS; i++)
 	    for(int j = 0; j < COLUMNS; j++)
 		board[i][j] = EMPTY;
+    }
+
+
+    public void reset() {
+	currentMove = setFirstMove();
+	clear();
     }
 
     
@@ -69,7 +75,7 @@ public class Connect4Logic {
 
     
     /**
-     * Use the java random number generator to determine
+     * Use the java psuedo random number generator to determine
      * which player goes first.
      * If the result is 0, red goes first.
      * If the result is 1, yellow goes first.
@@ -92,10 +98,11 @@ public class Connect4Logic {
 		makeMove(column);
 		System.out.println(toString());
 		System.out.println("Checking if " + currentMove + " won the game...");		
-		if(gameOver())		
+		if(gameOver()) {		
 		    System.out.println(currentMove + " wins.");
-		else 
+		} else { 
 		    switchTurns();
+		}
 				
 	    } else {
 		System.out.println("invalid move");
@@ -115,15 +122,15 @@ public class Connect4Logic {
 
     
     /**
-     * Make a move given a column.    
+     * Make a move given a column. Return the position
+     * in the rows 
      * @param int column
-     * @return boolean
+     * @return int 
      */
-    public void makeMove(int column) {
-	if(verifyMove(column)) {
-	    int result = findPosition(column);
-	    board[result][column] = currentMove;
-	}
+    public int makeMove(int column) {
+	int result = findPosition(column);
+	board[result][column] = currentMove;
+	return result;
     }
 
     
@@ -137,6 +144,8 @@ public class Connect4Logic {
 	for (int i = 0; i < ROWS; i++) {
 	    if (board[i][column] == EMPTY) {
 	        result++;
+	    } else {
+		return result;
 	    }
 	}
 	return result;
@@ -158,8 +167,7 @@ public class Connect4Logic {
 
     
     /**
-     * Determine if the game is over. This method
-     * will only check if the currentMove is a winner.
+     * Determine if the game is over. 
      * @return boolean
      */
     public boolean gameOver() {
@@ -173,14 +181,10 @@ public class Connect4Logic {
      */
     private boolean checkRows() {
 	for(int i = 0; i < ROWS; i++) {
-	    int result = 0;
+	    int count = 0;
 	    for(int j = 0; j < COLUMNS; j++) {
-		if(board[i][j] == currentMove) {
-		    result++;
-		    if(result == WIN) return true;
-		} else {
-		    result = 0;
-		}
+		count = checkCount(count, i, j);
+		if (count == WIN) return true;
 	    }
 	}
 	return false;
@@ -193,14 +197,10 @@ public class Connect4Logic {
      */
     private boolean checkColumns() {
 	for(int i = 0; i < COLUMNS; i++) {
-	    int result = 0;
+	    int count = 0;
 	    for(int j = 0; j < ROWS; j++) {
-		if(board[j][i] == currentMove) {		    
-		    result++;
-		    if(result == WIN) return true;   
-		} else {
-		    result = 0;
-		}		
+		count = checkCount(count, j, i);
+		if (count == WIN) return true;
 	    }
 	} 
 	return false;
@@ -209,16 +209,79 @@ public class Connect4Logic {
 
 
     /**
-     * Check the diagonals for a winner. The
-     * algorithm will be different depending on
-     * the dimensions of the board.
+     * Check the diagonals for a winner. 
      * @return boolean
      */
     private boolean checkDiagonals() {
+	
+	for (int i = 0; i <= ROWS-WIN; i++) {
+	    if (checkRightDiagonal(i, 0)
+		||
+		checkLeftDiagonal(i, COLUMNS-1)) {
+
+		return true;
+	    }
+	}
+
+
+	for (int i = 1; i <= COLUMNS-WIN; i++) {
+	    if (checkRightDiagonal(0, i)
+		||
+		checkLeftDiagonal(0, COLUMNS-i-1)) {
+
+		return true;
+	    }
+	}	    
 	return false;
     }
 
 
+    /**
+     * Check a diagonal that goes from left to right.
+     * @return boolean
+     */
+    private boolean checkRightDiagonal(int row, int col) {				       
+	int count = 0;
+	while (row < ROWS && col < COLUMNS) {
+	    count = checkCount(count, row, col);
+	    if (count == WIN) return true;
+	    row++;
+	    col++;
+	}
+	return false;
+    }
+
+
+    /**
+     * Check a diagonal that goes from right to left
+     * @return boolean
+     */
+    private boolean checkLeftDiagonal(int row, int col) {	
+	int count = 0;
+	while (row < ROWS && col >= 0) {
+	    count = checkCount(count, row, col);
+	    if (count == WIN) return true;
+	    row++;
+	    col--;
+	}
+	return false;
+    }
+
+    
+    /** 
+     * Check the counter used by the win detection algorithm
+     * return the new value of the counter after checking the
+     * position given by
+     * @param int row, int col
+     * @return int
+     */
+    private int checkCount(int count, int row, int col) {
+	if (board[row][col] == currentMove) {
+	    return ++count;
+	} else {
+	    return 0;
+	}
+    }
     
     /**
      * After a move is made, switch currentMove to be 

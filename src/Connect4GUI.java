@@ -1,20 +1,17 @@
 /**
  * Sean Schlaefli
  * Connect4GUI.java
- * GUI implementation to represent the ConnectFour game
+ * GUI implementation to represent the Connect4 game
  * compiles
  * working/tested
  */
 
 
 import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-
 import javafx.animation.TranslateTransition;
 import javafx.application.Application;
-import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.Group;
 import javafx.geometry.Pos;
 import javafx.scene.effect.Light;
 import javafx.scene.effect.Lighting;
@@ -33,109 +30,153 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import javafx.scene.control.Label;
+import javafx.scene.control.Button;
 
 public class Connect4GUI extends Application {
 
-
     private static final int TILE_SIZE = 80;
-    private static int columns;
-    private static int rows;
+    private static final int BOX_WIDTH = 100;
+    private Stage stage;
+    private int columnSize;
+    private int rowSize;
     private Connect4Controller controller;
-    private Disc[][] grid;
-    private Pane discRoot;
     private boolean redMove;
-
+    private BorderPane layout;
+    private Group gridRoot;
+    private ArrayList<Rectangle> columns;
+    
     
     public Connect4GUI(Connect4Controller controller){
 	this.controller = controller;
 	controller.attachView(this);
-	columns = controller.getColumns();
-	rows = controller.getRows();
-	redMove = controller.getCurrentMove();;
-	grid = new Disc[columns][rows];
-	discRoot = new Pane();
+	columnSize = controller.getColumns();
+	rowSize = controller.getRows();
+	redMove = controller.getCurrentMove();
     }    
-
     
-    private Parent createContent() {
-	BorderPane ui = new BorderPane();
-	Pane root = new Pane();	    
-	root.getChildren().add(discRoot);
-	Shape gridShape = makeGrid();
-	root.getChildren().add(gridShape);
-	root.getChildren().addAll(makeColumns());
-	ui.setCenter(root);
-	ui.setLeft(makePlayerBox("Player 1", Color.RED));
-	ui.setRight(makePlayerBox("Player 2", Color.YELLOW));
-	return ui;
+    
+    public Scene createGameUI() {
+	initializeElements();
+	setupGrid();
+	setupLayout();
+	return new Scene(layout, 2 * BOX_WIDTH + TILE_SIZE * columnSize, 650);
     }
 
     
-    private Shape makeGrid() {
-	Shape shape = new Rectangle((columns + 1) * TILE_SIZE, (rows + 1) * TILE_SIZE);
-	Circle circle;
-	for (int y = 0; y < rows; y++) {
-	    for (int x = 0; x < columns; x++) {
-		circle = new Circle(TILE_SIZE / 2);
-		circle.setCenterX(TILE_SIZE / 2);
-		circle.setCenterY(TILE_SIZE / 2);
-		
-		circle.setTranslateX(x * (TILE_SIZE + 5) + TILE_SIZE / 4);
-		circle.setTranslateY(y * (TILE_SIZE + 5) + TILE_SIZE / 4);
-		
-		shape = Shape.subtract(shape,  circle);
+    private void initializeElements() {
+	layout = new BorderPane();
+	gridRoot = new Group();
+	columns = new ArrayList<Rectangle>();
+    }
+
+    private void setupGrid() {
+	gridRoot.prefWidth(TILE_SIZE * columnSize);
+	gridRoot.prefHeight(TILE_SIZE * rowSize);
+	gridRoot.getChildren().add(createGrid());
+	createColumns();
+	gridRoot.getChildren().addAll(columns);
+    }
+
+    
+    private void setupLayout() {
+	layout.setCenter(gridRoot);
+	layout.setLeft(createPlayerBox("Player 1", Color.RED));
+	layout.setRight(createPlayerBox("Player 2", Color.YELLOW));
+    }
+    
+    
+    private Shape createGrid() {
+	Shape grid = new Rectangle(columnSize * TILE_SIZE, rowSize * TILE_SIZE);
+	for (int x = 0; x < columnSize; x++) {
+	    for (int y = 0; y < rowSize; y++) {
+		grid = Shape.subtract(grid, createCircle(x,y, Color.WHITE));
 	    }
 	}
-	
+	grid.setFill(Color.BLUE);
+	grid.setEffect(createLighting(createLight()));
+	return grid;
+    }
+
+
+    private void createColumns() {
+	for (int x = 0; x < columnSize; x++) {
+	    Rectangle rect = new Rectangle(TILE_SIZE, rowSize * TILE_SIZE);
+	    rect.setX(x * TILE_SIZE);
+	    rect.setFill(Color.TRANSPARENT);
+	    initializeColumnAction(rect, x);
+	    columns.add(rect);
+	}
+    }
+
+    
+    private Circle createCircle(int x, int y, Color color) {
+	Circle circle = new Circle(TILE_SIZE / 3);
+	circle.setCenterX(x * TILE_SIZE + TILE_SIZE / 2);
+	circle.setCenterY(y * TILE_SIZE + TILE_SIZE / 2);
+	circle.setFill(color);
+	return circle;
+    }
+
+    
+    private Light.Distant createLight() {
 	Light.Distant light = new Light.Distant();
 	light.setAzimuth(45.0);
 	light.setElevation(30.0);
-	
+	return light;
+    }
+
+    
+    private Lighting createLighting(Light.Distant light) {
 	Lighting lighting = new Lighting();
 	lighting.setLight(light);
 	lighting.setSurfaceScale(5.0);
-	
-	shape.setFill(Color.BLUE);
-	shape.setEffect(lighting);
-	return shape;
+	return lighting;
     }
+
     
+    private void initializeColumnAction(Rectangle rect, int colPosition) {
+	rect.setOnMouseEntered(e -> rect.setFill(Color.rgb(200, 200, 50, 0.3)));
+	rect.setOnMouseExited(e -> rect.setFill(Color.TRANSPARENT));
+	rect.setOnMouseClicked(e -> handleUserMove(colPosition));
+    }
 
-    private List<Rectangle> makeColumns() {
-	List<Rectangle> list = new ArrayList<>();
-	for (int x = 0; x < columns; x++) {
-	    Rectangle rect = new Rectangle(TILE_SIZE, (rows + 1) * TILE_SIZE);
-	    rect.setTranslateX(x * (TILE_SIZE + 5) + TILE_SIZE / 4);
-	    rect.setFill(Color.TRANSPARENT);
-	    
-	    rect.setOnMouseEntered(e -> rect.setFill(Color.rgb(200, 200, 50, 0.3)));
-	    rect.setOnMouseExited(e -> rect.setFill(Color.TRANSPARENT));
-	    final int column = x;
-	    
-	    rect.setOnMouseClicked(e -> {
-		    if(controller.verify(column)) {
-			controller.makeMove(column);
-			placeDisc(new Disc(redMove), column);
 
-			if(controller.isOver()) {
-			    gameOver(true);
-			} else if(controller.isDraw()) {
-			    gameOver(false);
-			} else {
-			    controller.switchTurns();
-			}
-
-		    }
-		});
-	    list.add(rect);
+    private void handleUserMove(int colPosition) {
+	if (controller.verifyMove(colPosition)) {
+	    int rowPosition = controller.makeMove(colPosition);
+	    addDisc(colPosition, rowPosition);
+	    if (controller.isGameOver()) {
+		controller.resetGame();
+		stage.setScene(createGameUI());
+	    } else {
+		switchTurns();
+		controller.switchTurns();
+	    }
 	}
-	return list;
     }
-    
 
-    private Pane makePlayerBox(String label, Color color){
+
+    private void addDisc(int colPosition, int rowPosition) {
+	Circle insert = new Circle(TILE_SIZE / 3, getColor());
+	insert.setCenterX(TILE_SIZE / 2);
+	insert.setCenterY(TILE_SIZE / 2);
+	insert.setTranslateX(colPosition * TILE_SIZE);
+	gridRoot.getChildren().add(insert);
+	playAnimation(insert, rowPosition);
+    }
+
+
+    private void playAnimation(Circle circle, int rowPosition) {
+	TranslateTransition animation = new TranslateTransition(Duration.seconds(0.5), circle);
+	animation.setToY(rowPosition * TILE_SIZE);
+	animation.play();
+    }
+
+    
+    private Pane createPlayerBox(String label, Color color){
 	VBox display = new VBox();
-	display.setPrefWidth(100);
+	display.setPrefWidth(BOX_WIDTH);
+	display.setPrefHeight(TILE_SIZE * rowSize);
 	display.setAlignment(Pos.BASELINE_CENTER);
 	Text player = new Text(label);
 	player.setFont(new Font(20));
@@ -152,11 +193,11 @@ public class Connect4GUI extends Application {
 	result.setText(outcome);
 	result.setFill(color);
 	result.setFont(new Font(20));
-	return result;
-	    
+	return result;	    
     }
     
 
+    /*
     private void gameOver(boolean result) {
 	final Stage gameOver = new Stage();
 	// blocks all events to other windows
@@ -183,58 +224,24 @@ public class Connect4GUI extends Application {
 	gameOver.setOnCloseRequest(e -> System.exit(0));
 	gameOver.show();	
     }
-
+    */
     
-    private void placeDisc(Disc disc, int column) {
-	int row = rows - 1;
-	do {
-	    if (!getDisc(column, row).isPresent())
-		break;
-	    row--;
-	} while (row >= 0);
-	
-	if (row < 0)
-	    return;
-	
-	grid[column][row] = disc;
-	discRoot.getChildren().add(disc);
-	disc.setTranslateX(column * (TILE_SIZE + 5) + TILE_SIZE / 4);
-	TranslateTransition animation = new TranslateTransition(Duration.seconds(0.5), disc);
-	animation.setToY(row * (TILE_SIZE + 5) + TILE_SIZE / 4);
-	animation.play();
-    }
-
 
     public void switchTurns() {
 	redMove = (redMove) ? false : true;
     }
 
-    
-    private Optional<Disc> getDisc(int inputColumn, int inputRow) {
-	if (inputColumn < 0 || inputColumn >= columns
-	    || inputRow < 0 || inputRow >= rows)
-	    return Optional.empty();
-	
-	return Optional.ofNullable(grid[inputColumn][inputRow]);
+
+    private Color getColor() {
+	return (redMove) ? Color.RED : Color.YELLOW;
     }
 
     
-    private static class Disc extends Circle {
-	private final boolean red;
-	
-	public Disc(boolean red) {
-	    super(TILE_SIZE / 2, red ? Color.RED : Color.YELLOW);
-	    this.red = red;
-	    
-	    setCenterX(TILE_SIZE / 2);
-	    setCenterY(TILE_SIZE / 2);
-	}
-    }
-    
     @Override
-    public void start(Stage stage) throws Exception {
-	stage.setScene(new Scene(createContent()));
-	stage.setTitle("Connect4");
+    public void start(Stage primaryStage) throws Exception {
+	stage = primaryStage;
+	stage.setScene(createGameUI());
+      	stage.setTitle("Connect4");
 	stage.show();
     }
     
