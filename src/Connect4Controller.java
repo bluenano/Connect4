@@ -59,8 +59,8 @@ public class Connect4Controller{
     }
     
 
-    public boolean isGameOver(){	    
-	return game.gameOver();
+    public boolean isWin(){	    
+	return game.isWin();
     }
 
     

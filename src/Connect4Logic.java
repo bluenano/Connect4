@@ -98,7 +98,7 @@ public class Connect4Logic {
 		makeMove(column);
 		System.out.println(toString());
 		System.out.println("Checking if " + currentMove + " won the game...");		
-		if(gameOver()) {		
+		if(isWin()) {		
 		    System.out.println(currentMove + " wins.");
 		} else { 
 		    switchTurns();
@@ -170,7 +170,7 @@ public class Connect4Logic {
      * Determine if the game is over. 
      * @return boolean
      */
-    public boolean gameOver() {
+    public boolean isWin() {
 	return checkRows() || checkColumns() || checkDiagonals();
     }
 

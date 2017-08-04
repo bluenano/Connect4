@@ -8,16 +8,21 @@
 
 
 import java.util.ArrayList;
+import java.lang.StringBuilder;
+import java.lang.Integer;
 import javafx.animation.TranslateTransition;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.Group;
+import javafx.scene.Node;
 import javafx.geometry.Pos;
 import javafx.scene.effect.Light;
 import javafx.scene.effect.Lighting;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
 import javafx.scene.paint.Color;
@@ -35,19 +40,25 @@ import javafx.scene.control.Button;
 public class Connect4GUI extends Application {
 
     private static final int TILE_SIZE = 80;
+    private static final int FONT_SIZE = 20;
     private static final int BOX_WIDTH = 100;
+    private static final int INDICATOR_RADIUS = BOX_WIDTH / 5;
+    private static final int BUTTON_WIDTH = 120;
+    
     private Stage stage;
     private int columnSize;
     private int rowSize;
     private Connect4Controller controller;
     private boolean redMove;
     private BorderPane layout;
+    private StackPane moveLog;
+    private HBox options;
     private Group gridRoot;
     private ArrayList<Rectangle> columns;
     private Circle redIndicator;
     private Circle yellowIndicator;
-    
-    
+
+        
     public Connect4GUI(Connect4Controller controller){
 	this.controller = controller;
 	controller.attachView(this);
@@ -58,7 +69,7 @@ public class Connect4GUI extends Application {
     
     
     public Scene createGameUI() {
-	initializeElements();
+	initializeGridElements();
 	setupMoveIndicator();
 	setupGrid();
 	setupLayout();
@@ -66,7 +77,7 @@ public class Connect4GUI extends Application {
     }
 
     
-    private void initializeElements() {
+    private void initializeGridElements() {
 	layout = new BorderPane();
 	gridRoot = new Group();
 	columns = new ArrayList<Rectangle>();
@@ -81,7 +92,7 @@ public class Connect4GUI extends Application {
 
 
     private Circle createIndicator() {
-	return new Circle(BOX_WIDTH / 5);
+	return new Circle(INDICATOR_RADIUS);
     }
 
     
@@ -106,15 +117,83 @@ public class Connect4GUI extends Application {
 
     
     private void setupLayout() {
+	moveLog = createBackground();
+	options = createOptions();
+	addPlayerBoxes();
+	layout.setCenter(gridRoot);
+	layout.setTop(moveLog);
+	layout.setBottom(options);
+    }
+    
+
+    private void addPlayerBoxes() {
 	Pane red = createPlayerBox("Player 1", Color.RED);
 	Pane yellow = createPlayerBox("Player 2", Color.YELLOW);
 	red.getChildren().add(redIndicator);
 	yellow.getChildren().add(yellowIndicator);
-	layout.setCenter(gridRoot);
 	layout.setLeft(red);
 	layout.setRight(yellow);
     }
+
     
+    private StackPane createBackground() {
+	StackPane background = new StackPane();
+	setupPane(background, BOX_WIDTH, TILE_SIZE * columnSize);
+	background.setAlignment(Pos.CENTER);
+	return background;
+    }
+
+
+    private HBox createOptions() {
+	HBox hbox = new HBox();
+	setupPane(hbox, BOX_WIDTH, TILE_SIZE * columnSize);
+	hbox.setAlignment(Pos.CENTER);
+	hbox.setSpacing(FONT_SIZE);
+	setupButtons(hbox);
+	disableButtons(hbox);
+	return hbox;
+    }
+
+
+    private void setupButtons(HBox box) {
+	Button play = createButton("Play again");
+	Button quit = createButton("Quit");
+	play.setOnMouseClicked(e -> {
+		controller.resetGame();
+		stage.setScene(createGameUI());
+	    });
+	quit.setOnMouseClicked(e -> System.exit(0));		
+	box.getChildren().addAll(play, quit);
+    }
+    
+    private Button createButton(String display) {
+	Button button = new Button(display);
+	button.setPrefWidth(BUTTON_WIDTH);
+	return button;
+    }
+
+    
+    private void enableButtons(Pane pane) {
+	for (Node node : pane.getChildren()) {
+	    node.setDisable(false);
+	}
+    }
+
+    
+    private void disableButtons(Pane pane) {
+	for (Node node : pane.getChildren()) {
+	    node.setDisable(true);
+	}
+    }
+
+    
+    private void setupPane(Pane pane, int height, int width) {
+	pane.setPrefHeight(height);
+	pane.setPrefWidth(width);
+	BackgroundFill color = new BackgroundFill(Color.BLACK, null, null);
+	pane.setBackground(new Background(color));
+    }
+
     
     private Shape createGrid() {
 	Shape grid = new Rectangle(columnSize * TILE_SIZE, rowSize * TILE_SIZE);
@@ -172,22 +251,93 @@ public class Connect4GUI extends Application {
     }
 
 
+    private void disableColumns() {
+	for(int i = 0; i < columns.size(); i++) {
+	    columns.get(i).setOnMouseClicked(null);
+	}
+    }
+
+    
     private void handleUserMove(int colPosition) {
 	if (controller.verifyMove(colPosition)) {
 	    int rowPosition = controller.makeMove(colPosition);
 	    addDisc(colPosition, rowPosition);
-	    if (controller.isGameOver()) {
-		controller.resetGame();
-		stage.setScene(createGameUI());
-	    } else {
-		switchTurns();
-		controller.switchTurns();
-		setIndicatorFill();
-	    }
+	    updateAfterMove(colPosition, rowPosition);
 	}
     }
 
 
+    private void updateAfterMove(int colPosition, int rowPosition) {
+	Text display;
+	if (controller.isWin()) {
+	    disableColumns();
+	    enableButtons(options);
+	    display = createWinDisplay();
+	} else if (controller.isDraw()) {
+	    disableColumns();
+	    enableButtons(options);
+	    display = createDrawDisplay();
+	} else {
+	    display = createMoveDisplay(colPosition, rowPosition);
+	    updateCurrentMove();
+	}
+	displayMove(display);
+    }
+
+
+    private void updateCurrentMove() {
+	switchTurns();
+	controller.switchTurns();
+	setIndicatorFill();	
+    }
+
+    
+    private void displayMove(Text display) {
+	removeDisplay();
+	addDisplay(display);
+    }
+
+
+    private void addDisplay(Text display) {
+	moveLog.getChildren().add(display);
+    }
+
+    
+    private void removeDisplay() {
+	moveLog.getChildren().clear();
+    }
+
+    
+    private Text createWinDisplay() {
+	if (redMove) {
+	    return generateDisplay("Player 1 won the game.", Color.RED);
+	} else {
+	    return generateDisplay("Player 2 won the game.", Color.YELLOW);
+	}
+    }
+
+
+    private Text createDrawDisplay() {
+	return generateDisplay("The game ended in a draw.", Color.WHITE);
+    }
+
+    
+    private Text createMoveDisplay(int colPosition, int rowPosition) {
+	String move = generateMoveString(colPosition, rowPosition);
+	return generateDisplay(move, getColor());
+    }
+
+
+    private String generateMoveString(int colPosition, int rowPosition) {
+	StringBuilder buildMove = new StringBuilder(getPlayer() + " moved to column ");
+	buildMove.append(Integer.toString(colPosition+1));
+	buildMove.append(", row ");
+	buildMove.append(Integer.toString(rowPosition+1));
+	buildMove.append(".");
+	return buildMove.toString();
+    }
+
+    
     private void addDisc(int colPosition, int rowPosition) {
 	Circle insert = new Circle(TILE_SIZE / 3, getColor());
 	insert.setCenterX(TILE_SIZE / 2);
@@ -212,7 +362,7 @@ public class Connect4GUI extends Application {
 	display.setAlignment(Pos.BASELINE_CENTER);
 	display.setSpacing(BOX_WIDTH / 4);
 	Text player = new Text(label);
-	player.setFont(new Font(20));
+	player.setFont(new Font(FONT_SIZE));
 	player.setFill(color);
 	BackgroundFill fill = new BackgroundFill(Color.BLACK, null, null);
 	display.setBackground(new Background(fill));
@@ -221,43 +371,13 @@ public class Connect4GUI extends Application {
     }
 
     
-    private Text generateResult(String outcome, Color color){
+    private Text generateDisplay(String outcome, Color color){
 	Text result = new Text();
 	result.setText(outcome);
 	result.setFill(color);
-	result.setFont(new Font(20));
+	result.setFont(new Font(FONT_SIZE));
 	return result;	    
     }
-    
-
-    /*
-    private void gameOver(boolean result) {
-	final Stage gameOver = new Stage();
-	// blocks all events to other windows
-	gameOver.initModality(Modality.APPLICATION_MODAL);
-	Text display = new Text();
-
-	if(result) {
-	    if(redMove) {
-		display = generateResult("Red won the game.", Color.RED);
-	    } else {
-		display = generateResult("Yellow won the game.", Color.YELLOW);
-	    }
-	} else {
-	    display = generateResult("The game ended in a draw.", Color.WHITE);
-	}
-	
-	VBox dialog = new VBox();
-	dialog.setAlignment(Pos.CENTER);
-	dialog.getChildren().add(display);
-	BackgroundFill fill = new BackgroundFill(Color.BLACK, null, null);
-	dialog.setBackground(new Background(fill));
-	Scene dialogScene = new Scene(dialog, 300, 200);
-	gameOver.setScene(dialogScene);
-	gameOver.setOnCloseRequest(e -> System.exit(0));
-	gameOver.show();	
-    }
-    */
     
 
     public void switchTurns() {
@@ -265,8 +385,13 @@ public class Connect4GUI extends Application {
     }
 
 
-    private Color getColor() {
+    public Color getColor() {
 	return (redMove) ? Color.RED : Color.YELLOW;
+    }
+
+
+    public String getPlayer() {
+	return (redMove) ? "Player 1" : "Player 2";
     }
 
     
