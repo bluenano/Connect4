@@ -7,12 +7,15 @@
  * working/tested
  */
 
+import javafx.scene.paint.Color;
+
 public class Connect4Controller{
 
+    
     private Connect4Logic game;
     private Connect4GUI view;
-    private final char RED = 'r';
-    private final char YELLOW = 'y';
+    private static final char RED = 'r';
+    private static final char YELLOW = 'r';
 
     
     public Connect4Controller(Connect4Logic game){
@@ -39,37 +42,79 @@ public class Connect4Controller{
     }
     
 
-    public boolean verifyMove(int column) {
-	return game.verifyMove(column);
+    public void handleUserMove(int column) {
+	if (game.verifyMove(column)) {
+	    sendMoveUpdates(column);
+	}
     }
 
 
-    public boolean getCurrentMove() {
+    private void sendMoveUpdates(int column) {
+	int row = game.makeMove(column);
+	view.addDisc(column, row, getPlayerColor());
+	checkForGameOver(column, row);
+    }
+
+
+    private void checkForGameOver(int column, int row) {
+	if (game.isWin()) {
+	    handleWin();
+	} else if (game.isDraw()) {
+	    handleDraw();
+	} else {
+	    handleNextMove(column, row);
+	}
+    }
+
+
+    private void handleWin() {
+	disableUserMoves();
+	view.displayWin(getPlayer(), getPlayerColor());
+    }
+
+    private void handleDraw() {
+	disableUserMoves();
+	view.displayDraw();
+    }
+
+    
+    private void handleNextMove(int column, int row) {	
+	view.displayMove(getPlayer(), getPlayerColor(), column, row);
+	switchTurns();		
+    }
+
+
+    private void disableUserMoves() {
+	view.disableColumns();
+	view.enableButtons();
+	view.disableMoveIndicator();
+    }
+
+
+    private boolean getCurrentMove() {
 	return game.getCurrentMove() == RED;
     }
 
-    
-    public int makeMove(int column){
-	return game.makeMove(column);
+
+    public String getPlayer() {
+	return (game.getCurrentMove() == RED) ? "Player Red" : "Player Yellow";
     }
 
 
+    public Color getPlayerColor() {
+	return (game.getCurrentMove() == RED) ? Color.RED : Color.YELLOW;
+    }
+
+    
     public void switchTurns() {
 	game.switchTurns();
-    }
-    
-
-    public boolean isWin(){	    
-	return game.isWin();
-    }
-
-    
-    public boolean isDraw() {
-	return game.isDraw();
-    }
+	view.setMoveIndicatorFill(getPlayerColor());
+    }   
     
 
     public void resetGame() {
 	game.reset();
+	view.setUIScene();
     }
+    
 }

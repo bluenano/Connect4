@@ -41,15 +41,19 @@ public class Connect4GUI extends Application {
 
     private static final int TILE_SIZE = 80;
     private static final int FONT_SIZE = 20;
-    private static final int BOX_WIDTH = 100;
-    private static final int INDICATOR_RADIUS = BOX_WIDTH / 5;
+    private static final int BOX_WIDTH = 150;
+	private static final int INDICATOR_RADIUS = TILE_SIZE / 3;
     private static final int BUTTON_WIDTH = 120;
+    
+    private static final Color RED = Color.RED;
+    private static final Color YELLOW = Color.YELLOW;
+    private static final Color DRAW = Color.WHITE;
+    private static final Color BACKGROUND = Color.BLACK;
     
     private Stage stage;
     private int columnSize;
     private int rowSize;
     private Connect4Controller controller;
-    private boolean redMove;
     private BorderPane layout;
     private StackPane moveLog;
     private HBox options;
@@ -57,14 +61,14 @@ public class Connect4GUI extends Application {
     private ArrayList<Rectangle> columns;
     private Circle redIndicator;
     private Circle yellowIndicator;
-
+    private Button play;
+    private Button quit;
         
     public Connect4GUI(Connect4Controller controller){
 	this.controller = controller;
 	controller.attachView(this);
 	columnSize = controller.getColumns();
 	rowSize = controller.getRows();
-	redMove = controller.getCurrentMove();
     }    
     
     
@@ -73,7 +77,13 @@ public class Connect4GUI extends Application {
 	setupMoveIndicator();
 	setupGrid();
 	setupLayout();
-	return new Scene(layout, 2 * BOX_WIDTH + TILE_SIZE * columnSize, 650);
+	return new Scene(layout, 2 * BOX_WIDTH + TILE_SIZE * columnSize, 750);
+    }
+
+
+    public void setUIScene() {
+	stage.setMaximized(true);
+	stage.setScene(createGameUI());
     }
 
     
@@ -87,23 +97,12 @@ public class Connect4GUI extends Application {
     private void setupMoveIndicator() {
 	redIndicator = createIndicator();       
 	yellowIndicator = createIndicator();
-	setIndicatorFill();
+	setMoveIndicatorFill(controller.getPlayerColor());
     }
 
 
     private Circle createIndicator() {
 	return new Circle(INDICATOR_RADIUS);
-    }
-
-    
-    private void setIndicatorFill() {
-	if (redMove) {
-	    redIndicator.setFill(Color.RED);
-	    yellowIndicator.setFill(Color.BLACK);
-	} else {
-	    redIndicator.setFill(Color.BLACK);
-	    yellowIndicator.setFill(Color.YELLOW);
-	}
     }
 
     
@@ -127,8 +126,8 @@ public class Connect4GUI extends Application {
     
 
     private void addPlayerBoxes() {
-	Pane red = createPlayerBox("Player 1", Color.RED);
-	Pane yellow = createPlayerBox("Player 2", Color.YELLOW);
+	Pane red = createPlayerBox("Player Red", RED);
+	Pane yellow = createPlayerBox("Player Yellow", YELLOW);
 	red.getChildren().add(redIndicator);
 	yellow.getChildren().add(yellowIndicator);
 	layout.setLeft(red);
@@ -150,21 +149,21 @@ public class Connect4GUI extends Application {
 	hbox.setAlignment(Pos.CENTER);
 	hbox.setSpacing(FONT_SIZE);
 	setupButtons(hbox);
-	disableButtons(hbox);
+	disableButtons();
 	return hbox;
     }
 
 
     private void setupButtons(HBox box) {
-	Button play = createButton("Play again");
-	Button quit = createButton("Quit");
+	play = createButton("Play again");
+	quit = createButton("Quit");
 	play.setOnMouseClicked(e -> {
 		controller.resetGame();
-		stage.setScene(createGameUI());
 	    });
 	quit.setOnMouseClicked(e -> System.exit(0));		
 	box.getChildren().addAll(play, quit);
     }
+
     
     private Button createButton(String display) {
 	Button button = new Button(display);
@@ -173,24 +172,22 @@ public class Connect4GUI extends Application {
     }
 
     
-    private void enableButtons(Pane pane) {
-	for (Node node : pane.getChildren()) {
-	    node.setDisable(false);
-	}
+    public void enableButtons() {
+	play.setDisable(false);
+	quit.setDisable(false);
     }
 
     
-    private void disableButtons(Pane pane) {
-	for (Node node : pane.getChildren()) {
-	    node.setDisable(true);
-	}
+    public void disableButtons() {
+	play.setDisable(true);
+	quit.setDisable(true);
     }
 
     
     private void setupPane(Pane pane, int height, int width) {
 	pane.setPrefHeight(height);
 	pane.setPrefWidth(width);
-	BackgroundFill color = new BackgroundFill(Color.BLACK, null, null);
+	BackgroundFill color = new BackgroundFill(BACKGROUND, null, null);
 	pane.setBackground(new Background(color));
     }
 
@@ -247,54 +244,20 @@ public class Connect4GUI extends Application {
     private void initializeColumnAction(Rectangle rect, int colPosition) {
 	rect.setOnMouseEntered(e -> rect.setFill(Color.rgb(200, 200, 50, 0.3)));
 	rect.setOnMouseExited(e -> rect.setFill(Color.TRANSPARENT));
-	rect.setOnMouseClicked(e -> handleUserMove(colPosition));
+	rect.setOnMouseClicked(e -> controller.handleUserMove(colPosition));
     }
 
 
-    private void disableColumns() {
+    public void disableColumns() {
 	for(int i = 0; i < columns.size(); i++) {
 	    columns.get(i).setOnMouseClicked(null);
 	}
     }
 
-    
-    private void handleUserMove(int colPosition) {
-	if (controller.verifyMove(colPosition)) {
-	    int rowPosition = controller.makeMove(colPosition);
-	    addDisc(colPosition, rowPosition);
-	    updateAfterMove(colPosition, rowPosition);
-	}
-    }
 
-
-    private void updateAfterMove(int colPosition, int rowPosition) {
-	Text display;
-	if (controller.isWin()) {
-	    disableColumns();
-	    enableButtons(options);
-	    display = createWinDisplay();
-	} else if (controller.isDraw()) {
-	    disableColumns();
-	    enableButtons(options);
-	    display = createDrawDisplay();
-	} else {
-	    display = createMoveDisplay(colPosition, rowPosition);
-	    updateCurrentMove();
-	}
-	displayMove(display);
-    }
-
-
-    private void updateCurrentMove() {
-	switchTurns();
-	controller.switchTurns();
-	setIndicatorFill();	
-    }
-
-    
-    private void displayMove(Text display) {
-	removeDisplay();
-	addDisplay(display);
+    private void display(Text move) {
+	clearDisplay();
+	addDisplay(move);
     }
 
 
@@ -303,33 +266,29 @@ public class Connect4GUI extends Application {
     }
 
     
-    private void removeDisplay() {
+    private void clearDisplay() {
 	moveLog.getChildren().clear();
     }
 
     
-    private Text createWinDisplay() {
-	if (redMove) {
-	    return generateDisplay("Player 1 won the game.", Color.RED);
-	} else {
-	    return generateDisplay("Player 2 won the game.", Color.YELLOW);
-	}
+    public void displayWin(String player, Color color) {
+	display(generateDisplay(player + " has won the game.", color));
     }
 
 
-    private Text createDrawDisplay() {
-	return generateDisplay("The game ended in a draw.", Color.WHITE);
+    public void displayDraw() {
+	display(generateDisplay("The game ended in a draw.", DRAW));
     }
 
     
-    private Text createMoveDisplay(int colPosition, int rowPosition) {
-	String move = generateMoveString(colPosition, rowPosition);
-	return generateDisplay(move, getColor());
+    public void displayMove(String player, Color color, int colPosition, int rowPosition) {
+	String move = generateMoveString(player, colPosition, rowPosition);
+	display(generateDisplay(move, color));
     }
 
 
-    private String generateMoveString(int colPosition, int rowPosition) {
-	StringBuilder buildMove = new StringBuilder(getPlayer() + " moved to column ");
+    private String generateMoveString(String player, int colPosition, int rowPosition) {
+	StringBuilder buildMove = new StringBuilder(player + " moved to column ");
 	buildMove.append(Integer.toString(colPosition+1));
 	buildMove.append(", row ");
 	buildMove.append(Integer.toString(rowPosition+1));
@@ -338,8 +297,8 @@ public class Connect4GUI extends Application {
     }
 
     
-    private void addDisc(int colPosition, int rowPosition) {
-	Circle insert = new Circle(TILE_SIZE / 3, getColor());
+    public void addDisc(int colPosition, int rowPosition, Color color) {
+	Circle insert = new Circle(TILE_SIZE / 3, color);
 	insert.setCenterX(TILE_SIZE / 2);
 	insert.setCenterY(TILE_SIZE / 2);
 	insert.setTranslateX(colPosition * TILE_SIZE);
@@ -357,17 +316,22 @@ public class Connect4GUI extends Application {
     
     private Pane createPlayerBox(String label, Color color){
 	VBox display = new VBox();
+	setupDisplayBox(display);
+	Text player = new Text(label);
+	player.setFont(new Font(FONT_SIZE));
+	player.setFill(color);
+	display.getChildren().add(player);
+	return display;	    
+    }
+
+
+    private void setupDisplayBox(VBox display) {
 	display.setPrefWidth(BOX_WIDTH);
 	display.setPrefHeight(TILE_SIZE * rowSize);
 	display.setAlignment(Pos.BASELINE_CENTER);
 	display.setSpacing(BOX_WIDTH / 4);
-	Text player = new Text(label);
-	player.setFont(new Font(FONT_SIZE));
-	player.setFill(color);
-	BackgroundFill fill = new BackgroundFill(Color.BLACK, null, null);
+	BackgroundFill fill = new BackgroundFill(BACKGROUND, null, null);
 	display.setBackground(new Background(fill));
-	display.getChildren().add(player);
-	return display;	    
     }
 
     
@@ -380,25 +344,31 @@ public class Connect4GUI extends Application {
     }
     
 
-    public void switchTurns() {
-	redMove = (redMove) ? false : true;
+    public void switchTurns(Color player) {
+	setMoveIndicatorFill(player);
     }
 
-
-    public Color getColor() {
-	return (redMove) ? Color.RED : Color.YELLOW;
+    public void setMoveIndicatorFill(Color player) {	
+	if (player == RED) {
+	    redIndicator.setFill(RED);
+	    yellowIndicator.setFill(BACKGROUND);
+	} else {
+	    redIndicator.setFill(BACKGROUND);
+	    yellowIndicator.setFill(YELLOW);
+	}
     }
 
-
-    public String getPlayer() {
-	return (redMove) ? "Player 1" : "Player 2";
+    
+    public void disableMoveIndicator() {
+	redIndicator.setFill(BACKGROUND);
+	yellowIndicator.setFill(BACKGROUND);
     }
 
     
     @Override
     public void start(Stage primaryStage) throws Exception {
 	stage = primaryStage;
-	stage.setScene(createGameUI());
+	setUIScene();
       	stage.setTitle("Connect4");
 	stage.show();
     }
