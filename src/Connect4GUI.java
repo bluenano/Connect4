@@ -52,6 +52,7 @@ public class Connect4GUI extends Application {
     private static final Color BACKGROUND = Color.BLACK;
 
     private Stage stage;
+    private Scene scene;
     private int columnSize;
     private int rowSize;
     private Connect4Controller controller;
@@ -71,21 +72,27 @@ public class Connect4GUI extends Application {
         controller.attachView(this);
         columnSize = controller.getColumns();
         rowSize = controller.getRows();
+        scene = null;
     }  
 
 
-    public Scene createGameUI() {
+    public void createGameUI() {
         initializeGridElements();
         setupMoveIndicator();
         setupGrid();
         setupLayout();
-        return new Scene(layout, 2 * BOX_WIDTH + TILE_SIZE * columnSize, 750);
+        if (scene != null) {
+            scene = new Scene(layout, scene.getWidth(), scene.getHeight());
+        } else {
+            scene = new Scene(layout, 2 * BOX_WIDTH + TILE_SIZE * columnSize, 750);
+        }
     }
 
 
     public void setUIScene() {
+        createGameUI();
+        stage.setScene(scene);
         stage.setMaximized(true);
-        stage.setScene(createGameUI());
     }
 
 
@@ -368,12 +375,17 @@ public class Connect4GUI extends Application {
     }
 
 
-    @Override
-    public void start(Stage primaryStage) throws Exception {
+    public void startGame(Stage primaryStage) {
         stage = primaryStage;
         setUIScene();
         stage.setTitle("Connect4");
         stage.show();
+    }
+
+
+    @Override
+    public void start(Stage primaryStage) throws Exception {
+        startGame(primaryStage);
     }
 
 
