@@ -49,7 +49,7 @@ public class Connect4GUI extends Application {
     private static final Color RED = Color.RED;
     private static final Color YELLOW = Color.YELLOW;
     private static final Color DRAW = Color.WHITE;
-    private static final Color BACKGROUND = Color.BLACK;
+    private static final Color BACKGROUND = Color.WHITE;
 
     private Stage stage;
     private Scene scene;
@@ -196,8 +196,8 @@ public class Connect4GUI extends Application {
     private void setupPane(Pane pane, int height, int width) {
         pane.setPrefHeight(height);
         pane.setPrefWidth(width);
-        BackgroundFill color = new BackgroundFill(BACKGROUND, null, null);
-        pane.setBackground(new Background(color));
+        //BackgroundFill color = new BackgroundFill(BACKGROUND, null, null);
+        //pane.setBackground(new Background(color));
     }
 
 
@@ -326,9 +326,9 @@ public class Connect4GUI extends Application {
     private Pane createPlayerBox(String label, Color color) {
         VBox display = new VBox();
         setupDisplayBox(display);
-        Text player = new Text(label);
+        Label player = new Label(label);
         player.setFont(new Font(FONT_SIZE));
-        player.setFill(color);
+        //player.setFill(color);
         display.getChildren().add(player);
         return display;
     }
@@ -339,15 +339,15 @@ public class Connect4GUI extends Application {
         display.setPrefHeight(TILE_SIZE * rowSize);
         display.setAlignment(Pos.BASELINE_CENTER);
         display.setSpacing(BOX_WIDTH / 4);
-        BackgroundFill fill = new BackgroundFill(BACKGROUND, null, null);
-        display.setBackground(new Background(fill));
+        //BackgroundFill fill = new BackgroundFill(BACKGROUND, null, null);
+        //display.setBackground(new Background(fill));
     }
 
 
     private Text generateDisplay(String outcome, Color color) {
         Text result = new Text();
         result.setText(outcome);
-        result.setFill(color);
+        //result.setFill(color);
         result.setFont(new Font(FONT_SIZE));
         return result;
     }
@@ -361,9 +361,9 @@ public class Connect4GUI extends Application {
     public void setMoveIndicatorFill(Color player) {
         if (player == RED) {
             redIndicator.setFill(RED);
-            yellowIndicator.setFill(BACKGROUND);
+            yellowIndicator.setFill(null);
         } else {
-            redIndicator.setFill(BACKGROUND);
+            redIndicator.setFill(null);
             yellowIndicator.setFill(YELLOW);
         }
     }
