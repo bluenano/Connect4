@@ -290,7 +290,12 @@ public class Connect4GUI extends Application {
     }
 
 
-    public void displayMove(String player, Color color, int colPosition, int rowPosition) {
+    public void displayMessage(String message) {
+        display(generateDisplay(message, null));
+    }
+
+
+    public void displayMove(String player, int colPosition, int rowPosition, Color color) {
         String move = generateMoveString(player, colPosition, rowPosition);
         display(generateDisplay(move, color));
     }
