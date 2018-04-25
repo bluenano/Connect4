@@ -36,12 +36,11 @@ public class Connect4NetGame {
         private PrintWriter out;
         private Socket socket;
         private ClientHandler opponent;
-        private String name;
 
-        public ClientHandler(Socket socket, char mark, String name) {
+
+        public ClientHandler(Socket socket, char mark) {
             this.socket = socket;
             this.mark = mark;
-            this.name = name;
 
             try {
                 in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
@@ -67,7 +66,6 @@ public class Connect4NetGame {
 
         // handles the other player move message
         public void opponentMoved(int column, int row) {
-            System.out.println(name + " " + "OPPONENT_MOVED" + " " + column + " " + row);
             out.println("OPPONENT_MOVED" + " " + column + " " + row);
             String result = game.isWin() ? "DEFEAT" : game.isDraw() ? "DRAW" : "";
             out.println(result);

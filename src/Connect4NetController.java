@@ -22,6 +22,7 @@ public class Connect4NetController extends Connect4Controller implements Runnabl
     private BufferedReader in;
     private PrintWriter out;
     private char mark;
+    private String name;  // use this as a display name in UI
 
     // have access to GUI named view
 
@@ -35,6 +36,16 @@ public class Connect4NetController extends Connect4Controller implements Runnabl
         } catch (IOException e) {
 
         }
+    }
+
+
+    public void exitApplication() {
+        Platform.runLater(new Runnable() {
+            public void run() {
+                view.close();                 
+            }
+        });
+        System.exit(0);
     }
 
 
@@ -65,6 +76,7 @@ public class Connect4NetController extends Connect4Controller implements Runnabl
         });
     }
 
+
     public void handleDefeat() {
         Platform.runLater(new Runnable() {
             public void run() {
@@ -72,6 +84,7 @@ public class Connect4NetController extends Connect4Controller implements Runnabl
             }
         });
     }
+
 
     public void handleDraw() {
         Platform.runLater(new Runnable() {
@@ -178,7 +191,10 @@ public class Connect4NetController extends Connect4Controller implements Runnabl
                 }
             }
         } catch (Exception e) {
-            System.out.println(e.getMessage());
+            System.out.println("Exception in run method of Connect4NetController");
+            System.out.println("Connection error");
+            System.out.println("Closing the application...");
+            exitApplication();            
         }
     }
 }

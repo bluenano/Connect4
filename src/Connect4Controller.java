@@ -3,6 +3,7 @@
  * abstract class for a controller 
 */
 
+import javafx.scene.paint.Color;
 
 public abstract class Connect4Controller {
 
@@ -15,7 +16,7 @@ public abstract class Connect4Controller {
 
     public abstract void handleUserMove(int column);
     public abstract void resetGame();
-    public abstract javafx.scene.paint.Color getPlayerColor();
+    public abstract Color getPlayerColor();
     public abstract String getPlayer();
     
     public void attachView(Connect4GUI view) {
@@ -30,6 +31,10 @@ public abstract class Connect4Controller {
         return COLUMNS;
     }
 
+
+    public Color getColor(char mark) {
+        return (mark == RED) ? Color.RED : Color.YELLOW;
+    }
 
    protected void handleWin() {
         disableUserMoves();

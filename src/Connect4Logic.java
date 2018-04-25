@@ -1,5 +1,4 @@
 /**
- * Sean Schlaefli
  * Connect4Logic.java
  * implements the Connect4 game logic.
  * Board is implemented rows x columns.

@@ -1,5 +1,4 @@
 /**
- * Sean Schlaefli
  * Connect4GUI.java
  * GUI implementation to represent the Connect4 game
  * compiles
@@ -36,7 +35,7 @@ import javafx.stage.Stage;
 import javafx.util.Duration;
 import javafx.scene.control.Label;
 import javafx.scene.control.Button;
-
+import javafx.application.Platform;
 
 public class Connect4GUI extends Application {
 
@@ -95,6 +94,10 @@ public class Connect4GUI extends Application {
         stage.setMaximized(true);
     }
 
+
+    public void close() {
+        Platform.exit();
+    }
 
     private void initializeGridElements() {
         layout = new BorderPane();

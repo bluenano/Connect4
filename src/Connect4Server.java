@@ -28,7 +28,7 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
-
+import java.net.InetAddress;
 
 public class Connect4Server {
 
@@ -42,8 +42,8 @@ public class Connect4Server {
             ServerSocket listener = new ServerSocket(PORT); 
             while (true) {
                 Connect4NetGame game = new Connect4NetGame(new Connect4Logic());
-                Connect4NetGame.ClientHandler p1 = game.new ClientHandler(listener.accept(), RED, "Thread1");
-                Connect4NetGame.ClientHandler p2 = game.new ClientHandler(listener.accept(), YELLOW, "Thread2");
+                Connect4NetGame.ClientHandler p1 = game.new ClientHandler(listener.accept(), RED);
+                Connect4NetGame.ClientHandler p2 = game.new ClientHandler(listener.accept(), YELLOW);
                 p1.setOpponent(p2);
                 p2.setOpponent(p1);
                 p1.start();

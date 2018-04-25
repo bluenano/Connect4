@@ -1,5 +1,4 @@
 /**
- * Sean Schlaefli
  * Connect4.java
  * Launches the Connect4 application.
  * compiles
@@ -12,68 +11,107 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.layout.VBox;
-import javafx.geometry.Pos;
+import javafx.scene.control.TextField;
 import java.lang.Thread;
 
 public class Connect4 extends Application {
 
-    private static final int SIZE = 100;
 
     public static void main(String [] args) {
         launch(args);
     }
 
 
-    public Scene createLaunchScene(Button local, Button online, Button quit) {
-        VBox box = new VBox();
-        box.setPrefWidth(SIZE);
-        local.setMinWidth(SIZE);
-        online.setMinWidth(SIZE);
-        quit.setMinWidth(SIZE);
-        box.setAlignment(Pos.CENTER);
-        box.setSpacing(30);
-        box.getChildren().addAll(local, online, quit);
-        return new Scene(box, SIZE*2, SIZE*2);
+    public void launchLocalGame(Stage stage) {
+            Connect4Controller controller = new Connect4LocalController(
+                                                 new Connect4Logic());
+            Connect4GUI app = new Connect4GUI(controller);
+            try {
+                app.start(stage);
+            } catch (Exception e) {
+                System.out.println(e.getMessage());
+                System.exit(0);
+            }
     }
 
-    @Override
-    public void start(Stage primaryStage) throws Exception {
+
+    public void launchNetworkGame(Stage stage, String server,
+                                  int port, String name) {
+        Connect4NetController controller = new Connect4NetController(server);
+        Connect4GUI app = new Connect4GUI(controller);
+        try {
+            app.start(stage);
+            Thread thread = new Thread(controller);
+            thread.start();
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            System.out.println("Exiting the application...");
+            System.exit(0);
+        }
+    }
+
+
+    public void showLaunchScene(Stage stage, Scene scene) {
+        stage.setScene(scene);
+        stage.setTitle("Connect4");
+        stage.show();
+    }
+
+
+    public void showNetInfoScene(Stage stage, Scene scene) {
+        stage.setScene(scene);
+        stage.setTitle("Network Connection Information");
+        stage.show();
+    }
+
+
+    public void launchScene(Stage stage) {
 
         Button local = new Button("Play Local");
         local.setOnMouseClicked(e -> {
-            Connect4Logic game = new Connect4Logic();
-            Connect4Controller controller = new Connect4LocalController(game);
-            Connect4GUI app = new Connect4GUI(controller);
-            try {
-                app.start(primaryStage);
-            } catch (Exception ex) {
-                System.out.println(ex.getMessage());
-                System.exit(0);
-            }
+            launchLocalGame(stage);
         });
 
         Button online = new Button("Play Online");
         online.setOnMouseClicked(e -> {
-            String server = "localhost";
-            Connect4NetController controller = new Connect4NetController(server);
-            Connect4GUI app = new Connect4GUI(controller);
-            try {
-                app.start(primaryStage);
-                Thread thread = new Thread(controller);
-                thread.start();
-            } catch (Exception ex) {
-                System.out.println(ex.getMessage());
-                System.exit(0);
-            }
+            Button connect = new Button("Connect");
+            Button menu = new Button("Main Menu");
+            TextField address = new TextField();
+            TextField textPort = new TextField();
+            TextField displayName = new TextField();
+
+            connect.setOnMouseClicked(e2 -> {
+                String server = address.getText();
+                int port = Integer.parseInt(textPort.getText());
+                String name = displayName.getText();
+                launchNetworkGame(stage, server, port, name);
+            });          
+
+            menu.setOnMouseClicked(e3 -> {
+                launchScene(stage);
+                                
+            });
+
+            showNetInfoScene(stage, 
+                               Components.createNetInfoScene(connect,
+                                                             menu,                                                         
+                                                             address,
+                                                             textPort,
+                                                             displayName));
+            connect.requestFocus();
         });
 
         Button quit = new Button("Quit");
         quit.setOnMouseClicked(e -> System.exit(0));
 
-        primaryStage.setScene(createLaunchScene(local, online, quit));
-        primaryStage.setTitle("Connect4");
-        primaryStage.show();
+        showLaunchScene(stage, 
+                        Components.createLaunchScene(local, online, quit));        
+    }
+
+
+    @Override
+    public void start(Stage primaryStage) throws Exception {
+        launchScene(primaryStage);
     }
 
 

@@ -1,5 +1,4 @@
 /**
- * Sean Schlaefli
  * Connect4LocalController.java
  * Controller to communicate between the GUI and
  * the game logic.
