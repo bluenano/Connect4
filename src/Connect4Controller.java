@@ -31,4 +31,22 @@ public abstract class Connect4Controller {
     }
 
 
+   protected void handleWin() {
+        disableUserMoves();
+        view.displayWin(getPlayer(), getPlayerColor());
+    }
+
+
+    protected void handleDraw() {
+        disableUserMoves();
+        view.displayDraw();
+    }
+
+
+    private void disableUserMoves() {
+        view.disableColumns();
+        view.enablePlayAgain();
+        view.disableMoveIndicator();
+    }
+
 }

@@ -19,6 +19,7 @@
  *                        DRAW
  *                        MESSAGE <text>
  *                        NEW_GAME
+ *                        SET <char> 
 */                        
 
 import java.io.BufferedReader;
@@ -40,13 +41,9 @@ public class Connect4Server {
         try {
             ServerSocket listener = new ServerSocket(PORT); 
             while (true) {
-                // create a class to handle the game between 2 players
-                // create a thread to handle communication for both players (maybe 1 thread per player?)
-                // make sure the thread knows the opponent
-                // start the threads
                 Connect4NetGame game = new Connect4NetGame(new Connect4Logic());
-                Connect4NetGame.ClientHandler p1 = game.new ClientHandler(listener.accept(), RED);
-                Connect4NetGame.ClientHandler p2 = game.new ClientHandler(listener.accept(), YELLOW);
+                Connect4NetGame.ClientHandler p1 = game.new ClientHandler(listener.accept(), RED, "Thread1");
+                Connect4NetGame.ClientHandler p2 = game.new ClientHandler(listener.accept(), YELLOW, "Thread2");
                 p1.setOpponent(p2);
                 p2.setOpponent(p1);
                 p1.start();

@@ -14,19 +14,19 @@ import java.io.PrintWriter;
 public class Connect4NetGame {
 
     private Connect4Logic game;
-    //private char currentMark; 
-    // use game.getCurrentMove() to get the currentMark
 
     public Connect4NetGame(Connect4Logic game) {
         this.game = game;
     }
 
-
-    public synchronized boolean isValidMove(char mark, int column) {
+    // unsure if this should be synchronized since I use a synchronized block
+    //public synchronized boolean isValidMove(char mark, int column) {
+    public boolean isValidMove(char mark, int column) {
         return mark == game.getCurrentMove() 
                &&
                game.verifyMove(column);
     }
+    
 
 
     public class ClientHandler extends Thread {
@@ -36,16 +36,19 @@ public class Connect4NetGame {
         private PrintWriter out;
         private Socket socket;
         private ClientHandler opponent;
+        private String name;
 
-        public ClientHandler(Socket socket, char mark) {
+        public ClientHandler(Socket socket, char mark, String name) {
             this.socket = socket;
             this.mark = mark;
+            this.name = name;
 
             try {
                 in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
                 out = new PrintWriter(socket.getOutputStream(), true);
-                out.println("MESSAGE Waiting for other player to connect");
                 out.println("WELCOME " + mark);
+                out.println("MESSAGE Waiting for other player to connect");
+                updateIndicator();
             } catch (IOException e) {
                 System.out.println(e.getMessage());
             }
@@ -57,11 +60,15 @@ public class Connect4NetGame {
         }
 
 
-        // handle the other player move message
+        public void updateIndicator() {
+            out.println("SET " + game.getCurrentMove());
+        }
+
+
+        // handles the other player move message
         public void opponentMoved(int column, int row) {
-            out.println("OPPONENT_MOVED" + column + " " + row);
-            System.out.println("OPPONENT_MOVED");
-            // check if opponent wins or if there is a draw
+            System.out.println(name + " " + "OPPONENT_MOVED" + " " + column + " " + row);
+            out.println("OPPONENT_MOVED" + " " + column + " " + row);
             String result = game.isWin() ? "DEFEAT" : game.isDraw() ? "DRAW" : "";
             out.println(result);
         }
@@ -70,30 +77,28 @@ public class Connect4NetGame {
         public void run() {
             try {
                 out.println("MESSAGE Players have connected, the game will begin now");
-
                 if (mark == game.getCurrentMove()) {
                     out.println("MESSAGE It it your turn");
                 }
 
-                // handle client requests
                 while (true) {
                     String clientMessage = in.readLine();
 
                     if (clientMessage.startsWith("MOVE")) {
-                        // HANDLE MOVE
                         int column = Integer.parseInt(clientMessage.substring(5));
                         synchronized(this) {
                             if (isValidMove(mark, column)) {
-                                // this code may contain a race condition
-                                // and lead to inconsistencies in game state
                                 int row = game.makeMove(column);
                                 game.switchTurns();
                                 out.println("VALID_MOVE " + column + " " + row);
                                 opponent.opponentMoved(column, row);
+                                updateIndicator();
+                                opponent.updateIndicator();
+                                String gameOver = game.isWin() ? "VICTORY" : game.isDraw() ? "DRAW" : "";
+                                out.println(gameOver);
                             }
                         }
                     } else if (clientMessage.startsWith("QUIT")) {
-                        // thread is no longer needed
                         return;
                     }
                 }

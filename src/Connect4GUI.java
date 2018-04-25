@@ -158,7 +158,7 @@ public class Connect4GUI extends Application {
         hbox.setAlignment(Pos.CENTER);
         hbox.setSpacing(FONT_SIZE);
         setupButtons(hbox);
-        disableButtons();
+        disablePlayAgain();
         return hbox;
     }
 
@@ -181,15 +181,14 @@ public class Connect4GUI extends Application {
     }
 
 
-    public void enableButtons() {
+    public void enablePlayAgain() {
         play.setDisable(false);
-        quit.setDisable(false);
+
     }
 
 
-    public void disableButtons() {
+    public void disablePlayAgain() {
         play.setDisable(true);
-        quit.setDisable(true);
     }
 
 

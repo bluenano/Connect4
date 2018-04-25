@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.UnknownHostException;
 import javafx.application.Platform;
+import java.lang.NumberFormatException;
 
 
 public class Connect4NetController extends Connect4Controller implements Runnable {
@@ -83,7 +84,6 @@ public class Connect4NetController extends Connect4Controller implements Runnabl
 
     public void handleUserMove(int column) {
         out.println("MOVE " + column);
-        System.out.println("MOVE " + column);
     }
 
 
@@ -91,8 +91,12 @@ public class Connect4NetController extends Connect4Controller implements Runnabl
 
     }
 
-    public void updateMoveIndicator() {
-
+    public void updateMoveIndicator(Color c) {
+        Platform.runLater(new Runnable() {
+            public void run() {
+                view.setMoveIndicatorFill(c);
+            }
+        });
     }
 
 
@@ -115,6 +119,11 @@ public class Connect4NetController extends Connect4Controller implements Runnabl
     }
 
 
+    public Color getColorFromServer(char fromServer) {
+        return (fromServer == RED) ? Color.RED : Color.YELLOW;
+    }
+
+
     @Override
     public void run() {
         // first message will be WELCOME <char>
@@ -124,6 +133,7 @@ public class Connect4NetController extends Connect4Controller implements Runnabl
             // GUI from a non-gui thread 
 
             fromServer = in.readLine();
+            System.out.println(fromServer);
             if (fromServer.startsWith("WELCOME")) {
                 mark = fromServer.charAt(8);
                 handleMessage("Welcome, you are " + getPlayer());
@@ -133,17 +143,18 @@ public class Connect4NetController extends Connect4Controller implements Runnabl
             while (true) {
                 fromServer = in.readLine();
                 if (fromServer.startsWith("VALID_MOVE")) {
-                    // do something
-                    int column = Integer.parseInt(fromServer.substring(11, 12));
-                    int row = Integer.parseInt(fromServer.substring(13));
-                    handleMove(column, row, getPlayer(), getPlayerColor());
+                    
+                    handleMove(Integer.parseInt(fromServer.substring(11, 12)),
+                               Integer.parseInt(fromServer.substring(13)),
+                               getPlayer(),
+                               getPlayerColor());
                 } else if (fromServer.startsWith("OPPONENT_MOVED")) {
-                    int column = Integer.parseInt(fromServer.substring(15, 16));
-                    int row = Integer.parseInt(fromServer.substring(17));
-                    String opponent = getOpponent();
-                    Color c = getOpponentColor();
-                    System.out.println("Opponent moved to" + column + " " + row);
-                    handleMove(column, row, opponent, c);
+
+                    handleMove(Integer.parseInt(fromServer.substring(15,16)),
+                               Integer.parseInt(fromServer.substring(17)),
+                               getOpponent(),
+                               getOpponentColor());
+
                 } else if (fromServer.startsWith("VICTORY")) {
                     // display victory and lock controls
                     handleWin();
@@ -158,12 +169,16 @@ public class Connect4NetController extends Connect4Controller implements Runnabl
                     String message = fromServer.substring(8);
                     handleMessage(message);
                 } else if (fromServer.startsWith("NEW_GAME")) {
-                    // clear display
+                    // reset GUI
 
+                } else if (fromServer.startsWith("SET")) {
+                    // I'm not sure why this works without using runLater
+                    char mark = fromServer.charAt(4);
+                    updateMoveIndicator(getColorFromServer(mark));
                 }
             }
         } catch (Exception e) {
-
+            System.out.println(e.getMessage());
         }
     }
 }

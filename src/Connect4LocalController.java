@@ -23,6 +23,7 @@ public class Connect4LocalController extends Connect4Controller {
         this.game = game;
     }
 
+
     public void handleUserMove(int column) {    
         if (game.verifyMove(column)) {
             sendMoveUpdates(column);
@@ -39,36 +40,18 @@ public class Connect4LocalController extends Connect4Controller {
 
     private void checkForGameOver(int column, int row) {
         if (game.isWin()) {
-            handleWin();
+            super.handleWin();
         } else if (game.isDraw()) {
-            handleDraw();
+            super.handleDraw();
         } else {
             handleNextMove(column, row);
         }
     }
 
-
-    private void handleWin() {
-        disableUserMoves();
-        view.displayWin(getPlayer(), getPlayerColor());
-    }
-
-    private void handleDraw() {
-        disableUserMoves();
-        view.displayDraw();
-    }
-
-
+ 
     private void handleNextMove(int column, int row) {
         view.displayMove(getPlayer(), column, row, getPlayerColor());
         switchTurns();
-    }
-
-
-    private void disableUserMoves() {
-        view.disableColumns();
-        view.enableButtons();
-        view.disableMoveIndicator();
     }
 
 
