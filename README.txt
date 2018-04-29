@@ -2,4 +2,4 @@ Connect4 Networked Board Game <br />
 
 <br />
 
-[[https://github.com/sean-ms/Connect4/blob/master/graphics/GUI screenshot.png|alt=octocat]]
+[[https://github.com/username/repository/blob/master/img/octocat.png|alt=octocat]]
