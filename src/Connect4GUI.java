@@ -1,5 +1,4 @@
 /**
- * Sean Schlaefli
  * Connect4GUI.java
  * GUI implementation to represent the Connect4 game
  * compiles
@@ -36,7 +35,7 @@ import javafx.stage.Stage;
 import javafx.util.Duration;
 import javafx.scene.control.Label;
 import javafx.scene.control.Button;
-
+import javafx.application.Platform;
 
 public class Connect4GUI extends Application {
 
@@ -65,7 +64,7 @@ public class Connect4GUI extends Application {
     private Circle yellowIndicator;
     private Button play;
     private Button quit;
-
+    
 
     public Connect4GUI(Connect4Controller controller) {
         this.controller = controller;
@@ -95,6 +94,10 @@ public class Connect4GUI extends Application {
         stage.setMaximized(true);
     }
 
+
+    public void close() {
+        Platform.exit();
+    }
 
     private void initializeGridElements() {
         layout = new BorderPane();
@@ -127,14 +130,14 @@ public class Connect4GUI extends Application {
     private void setupLayout() {
         moveLog = createBackground();
         options = createOptions();
-        addPlayerBoxes();
+        addPlayerBoxes("Player Red", "Player Yellow");
         layout.setCenter(gridRoot);
         layout.setTop(moveLog);
         layout.setBottom(options);
     }
 
 
-    private void addPlayerBoxes() {
+    private void addPlayerBoxes(String player1, String player2) {
         Pane red = createPlayerBox("Player Red", RED);
         Pane yellow = createPlayerBox("Player Yellow", YELLOW);
         red.getChildren().add(redIndicator);
@@ -158,7 +161,7 @@ public class Connect4GUI extends Application {
         hbox.setAlignment(Pos.CENTER);
         hbox.setSpacing(FONT_SIZE);
         setupButtons(hbox);
-        disableButtons();
+        disablePlayAgain();
         return hbox;
     }
 
@@ -181,15 +184,14 @@ public class Connect4GUI extends Application {
     }
 
 
-    public void enableButtons() {
+    public void enablePlayAgain() {
         play.setDisable(false);
-        quit.setDisable(false);
+
     }
 
 
-    public void disableButtons() {
+    public void disablePlayAgain() {
         play.setDisable(true);
-        quit.setDisable(true);
     }
 
 
@@ -290,7 +292,12 @@ public class Connect4GUI extends Application {
     }
 
 
-    public void displayMove(String player, Color color, int colPosition, int rowPosition) {
+    public void displayMessage(String message) {
+        display(generateDisplay(message, null));
+    }
+
+
+    public void displayMove(String player, int colPosition, int rowPosition, Color color) {
         String move = generateMoveString(player, colPosition, rowPosition);
         display(generateDisplay(move, color));
     }
@@ -328,7 +335,6 @@ public class Connect4GUI extends Application {
         setupDisplayBox(display);
         Label player = new Label(label);
         player.setFont(new Font(FONT_SIZE));
-        //player.setFill(color);
         display.getChildren().add(player);
         return display;
     }
@@ -339,8 +345,6 @@ public class Connect4GUI extends Application {
         display.setPrefHeight(TILE_SIZE * rowSize);
         display.setAlignment(Pos.BASELINE_CENTER);
         display.setSpacing(BOX_WIDTH / 4);
-        //BackgroundFill fill = new BackgroundFill(BACKGROUND, null, null);
-        //display.setBackground(new Background(fill));
     }
 
 

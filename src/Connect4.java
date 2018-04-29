@@ -1,5 +1,4 @@
 /**
- * Sean Schlaefli
  * Connect4.java
  * Launches the Connect4 application.
  * compiles
@@ -8,8 +7,13 @@
 
 
 import javafx.application.Application;
+import javafx.scene.Scene;
 import javafx.stage.Stage;
-
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
+import java.lang.Thread;
+import java.lang.NumberFormatException;
 
 public class Connect4 extends Application {
 
@@ -19,12 +23,110 @@ public class Connect4 extends Application {
     }
 
 
+    public void launchLocalGame(Stage stage) {
+            Connect4Controller controller = new Connect4LocalController(
+                                            new Connect4Logic());
+            Connect4GUI app = new Connect4GUI(controller);
+            try {
+                app.start(stage);
+            } catch (Exception e) {
+                System.out.println(e.getMessage());
+                System.exit(0);
+            }
+    }
+
+
+    public void launchNetworkGame(Stage stage, String server,
+                                  int port, String name) {
+        Connect4NetController controller = new Connect4NetController(server, port, name);
+        Connect4GUI app = new Connect4GUI(controller);
+        try {
+            app.start(stage);
+            Thread thread = new Thread(controller);
+            thread.start();
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            System.out.println("Exiting the application...");
+            System.exit(0);
+        }
+    }
+
+
+    public void showLaunchScene(Stage stage, Scene scene) {
+        stage.setScene(scene);
+        stage.setTitle("Connect4");
+        stage.show();
+    }
+
+
+    public void showNetInfoScene(Stage stage, Scene scene) {
+        stage.setScene(scene);
+        stage.setTitle("Network Connection Information");
+        stage.show();
+    }
+
+
+    // creates and initializes the launch scene
+    public void launchScene(Stage stage) {
+
+        Button local = new Button("Play Local");
+        local.setOnMouseClicked(e -> {
+            launchLocalGame(stage);
+        });
+
+        Button online = new Button("Play Online");
+        online.setOnMouseClicked(e -> {
+            Button connect = new Button("Connect");
+            Button menu = new Button("Main Menu");
+            TextField address = new TextField();
+            TextField textPort = new TextField();
+            TextField displayName = new TextField();
+
+            connect.setOnMouseClicked(e2 -> {
+                try {
+                    String server = address.getText();
+                    int port = Integer.parseInt(textPort.getText());
+                    String name = displayName.getText();
+                    if (!server.equals("")
+                        &&
+                        port >= 0 && port <= 65535
+                        &&
+                        !name.equals("")) {
+                        launchNetworkGame(stage, server, port, name);
+                    } else {                        
+                        System.out.println("Enter valid network connection information");
+                    }
+
+                } catch (NumberFormatException ex) {
+                    System.out.println(ex.getMessage());
+                }
+            });          
+
+            menu.setOnMouseClicked(e3 -> {
+                launchScene(stage);
+                                
+            });
+
+            showNetInfoScene(stage, 
+                               Components.createNetInfoScene(connect,
+                                                             menu,                                                         
+                                                             address,
+                                                             textPort,
+                                                             displayName));
+            connect.requestFocus();
+        });
+
+        Button quit = new Button("Quit");
+        quit.setOnMouseClicked(e -> System.exit(0));
+
+        showLaunchScene(stage, 
+                        Components.createLaunchScene(local, online, quit));        
+    }
+
+
     @Override
     public void start(Stage primaryStage) throws Exception {
-        Connect4Logic game = new Connect4Logic();
-        Connect4Controller controller = new Connect4Controller(game);
-        Connect4GUI app = new Connect4GUI(controller);
-        app.start(primaryStage);
+        launchScene(primaryStage);
     }
 
 
