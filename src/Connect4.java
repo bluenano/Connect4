@@ -13,6 +13,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import java.lang.Thread;
+import java.lang.NumberFormatException;
 
 public class Connect4 extends Application {
 
@@ -24,7 +25,7 @@ public class Connect4 extends Application {
 
     public void launchLocalGame(Stage stage) {
             Connect4Controller controller = new Connect4LocalController(
-                                                 new Connect4Logic());
+                                            new Connect4Logic());
             Connect4GUI app = new Connect4GUI(controller);
             try {
                 app.start(stage);
@@ -37,7 +38,7 @@ public class Connect4 extends Application {
 
     public void launchNetworkGame(Stage stage, String server,
                                   int port, String name) {
-        Connect4NetController controller = new Connect4NetController(server);
+        Connect4NetController controller = new Connect4NetController(server, port, name);
         Connect4GUI app = new Connect4GUI(controller);
         try {
             app.start(stage);
@@ -65,6 +66,7 @@ public class Connect4 extends Application {
     }
 
 
+    // creates and initializes the launch scene
     public void launchScene(Stage stage) {
 
         Button local = new Button("Play Local");
@@ -81,10 +83,23 @@ public class Connect4 extends Application {
             TextField displayName = new TextField();
 
             connect.setOnMouseClicked(e2 -> {
-                String server = address.getText();
-                int port = Integer.parseInt(textPort.getText());
-                String name = displayName.getText();
-                launchNetworkGame(stage, server, port, name);
+                try {
+                    String server = address.getText();
+                    int port = Integer.parseInt(textPort.getText());
+                    String name = displayName.getText();
+                    if (!server.equals("")
+                        &&
+                        port >= 0 && port <= 65535
+                        &&
+                        !name.equals("")) {
+                        launchNetworkGame(stage, server, port, name);
+                    } else {                        
+                        System.out.println("Enter valid network connection information");
+                    }
+
+                } catch (NumberFormatException ex) {
+                    System.out.println(ex.getMessage());
+                }
             });          
 
             menu.setOnMouseClicked(e3 -> {

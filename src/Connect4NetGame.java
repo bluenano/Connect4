@@ -72,6 +72,12 @@ public class Connect4NetGame {
         }
 
 
+        public void setOpponentName(String name) {
+            System.out.println("NAME " + name);
+            out.println("NAME " + name);
+        }
+
+
         public void run() {
             try {
                 out.println("MESSAGE Players have connected, the game will begin now");
@@ -98,6 +104,12 @@ public class Connect4NetGame {
                         }
                     } else if (clientMessage.startsWith("QUIT")) {
                         return;
+                    } else if (clientMessage.startsWith("REMATCH")) {
+
+                    } else if (clientMessage.startsWith("DISPLAY")) {
+                        String name = clientMessage.substring(8);
+                        System.out.println("Received: " + name);
+                        opponent.setOpponentName(name);
                     }
                 }
             } catch (IOException e) {

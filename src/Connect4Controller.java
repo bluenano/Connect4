@@ -18,7 +18,7 @@ public abstract class Connect4Controller {
     public abstract void resetGame();
     public abstract Color getPlayerColor();
     public abstract String getPlayer();
-    
+
     public void attachView(Connect4GUI view) {
         this.view = view;
     }

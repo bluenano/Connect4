@@ -78,5 +78,6 @@ public class Connect4LocalController extends Connect4Controller {
     public Color getPlayerColor() {
         return (game.getCurrentMove() == RED) ? Color.RED : Color.YELLOW;
     }
-    
+
+
 }

@@ -14,12 +14,13 @@
  * MOVE <col>             WELCOME <char> (char {R, Y})
  * QUIT                   VALID_MOVE <col> <row>
  * REMATCH                OTHER_PLAYER_MOVED <col> <row> 
- *                        VICTORY 
+ * DISPLAY <name>         VICTORY 
  *                        DEFEAT
  *                        DRAW
  *                        MESSAGE <text>
  *                        NEW_GAME
  *                        SET <char> 
+ *                        NAME <string>
 */                        
 
 import java.io.BufferedReader;
@@ -32,7 +33,7 @@ import java.net.InetAddress;
 
 public class Connect4Server {
 
-    private static int PORT = 8902;
+    private static final int PORT = 8902;
     private static char RED = 'r';
     private static char YELLOW = 'y';
 

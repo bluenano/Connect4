@@ -64,7 +64,7 @@ public class Connect4GUI extends Application {
     private Circle yellowIndicator;
     private Button play;
     private Button quit;
-
+    
 
     public Connect4GUI(Connect4Controller controller) {
         this.controller = controller;
@@ -130,14 +130,14 @@ public class Connect4GUI extends Application {
     private void setupLayout() {
         moveLog = createBackground();
         options = createOptions();
-        addPlayerBoxes();
+        addPlayerBoxes("Player Red", "Player Yellow");
         layout.setCenter(gridRoot);
         layout.setTop(moveLog);
         layout.setBottom(options);
     }
 
 
-    private void addPlayerBoxes() {
+    private void addPlayerBoxes(String player1, String player2) {
         Pane red = createPlayerBox("Player Red", RED);
         Pane yellow = createPlayerBox("Player Yellow", YELLOW);
         red.getChildren().add(redIndicator);
@@ -335,7 +335,6 @@ public class Connect4GUI extends Application {
         setupDisplayBox(display);
         Label player = new Label(label);
         player.setFont(new Font(FONT_SIZE));
-        //player.setFill(color);
         display.getChildren().add(player);
         return display;
     }
@@ -346,8 +345,6 @@ public class Connect4GUI extends Application {
         display.setPrefHeight(TILE_SIZE * rowSize);
         display.setAlignment(Pos.BASELINE_CENTER);
         display.setSpacing(BOX_WIDTH / 4);
-        //BackgroundFill fill = new BackgroundFill(BACKGROUND, null, null);
-        //display.setBackground(new Background(fill));
     }
 
 

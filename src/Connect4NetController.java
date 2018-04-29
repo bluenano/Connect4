@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.UnknownHostException;
 import javafx.application.Platform;
+import java.lang.IllegalArgumentException;
 import java.lang.NumberFormatException;
 
 
@@ -22,20 +23,27 @@ public class Connect4NetController extends Connect4Controller implements Runnabl
     private BufferedReader in;
     private PrintWriter out;
     private char mark;
-    private String name;  // use this as a display name in UI
+    private String name;  // use this as a display name in UI, might not need to store it
 
     // have access to GUI named view
 
-    public Connect4NetController(String serverAddress) {
+    public Connect4NetController(String serverAddress, int port, String name) {
         try {
-            socket = new Socket(serverAddress, PORT);
+            socket = new Socket(serverAddress, port);
             in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             out = new PrintWriter(socket.getOutputStream(), true);
+            this.name = name;
+            out.println("DISPLAY " + name);
         } catch (UnknownHostException e) {
             // close the program or maybe try to load the menu again
         } catch (IOException e) {
 
+        } catch (IllegalArgumentException e) {
+            System.out.println(e.getMessage());
+            // consider reloading main menu
+            exitApplication();
         }
+
     }
 
 
@@ -146,7 +154,6 @@ public class Connect4NetController extends Connect4Controller implements Runnabl
             // GUI from a non-gui thread 
 
             fromServer = in.readLine();
-            System.out.println(fromServer);
             if (fromServer.startsWith("WELCOME")) {
                 mark = fromServer.charAt(8);
                 handleMessage("Welcome, you are " + getPlayer());
@@ -188,6 +195,10 @@ public class Connect4NetController extends Connect4Controller implements Runnabl
                     // I'm not sure why this works without using runLater
                     char mark = fromServer.charAt(4);
                     updateMoveIndicator(getColorFromServer(mark));
+                } else if (fromServer.startsWith("NAME")) {
+                    String opponent = fromServer.substring(5);
+                    // send to view for display
+                    System.out.println("Name received: " + opponent);
                 }
             }
         } catch (Exception e) {
