@@ -1,6 +1,5 @@
-Sean Schlaefli
-seanschlaefli@yahoo.com
-Connect4 project
+Connect4 Networked Board Game <br />
 
-how to run:
-update this later
+<br />
+
+[[https://github.com/sean-ms/Connect4/blob/master/graphics/GUI screenshot.png|alt=octocat]]
