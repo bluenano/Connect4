@@ -1,6 +1,8 @@
-# Project Title
+# Connect4 Networked Board Game
 
-One Paragraph of project description goes here
+Graphical User Interface project implemented using JavaFX. The application allows users to play local games and network games against other users.
+
+![Alt text](/graphics/GUI screenshot.jpg?raw=true "GUI")
 
 ## Getting Started
 
