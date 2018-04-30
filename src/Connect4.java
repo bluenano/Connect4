@@ -84,9 +84,15 @@ public class Connect4 extends Application {
 
             connect.setOnMouseClicked(e2 -> {
                 try {
-                    String server = address.getText();
-                    int port = Integer.parseInt(textPort.getText());
-                    String name = displayName.getText();
+                    // String server = address.getText();
+                    // int port = Integer.parseInt(textPort.getText());
+                    // String name = displayName.getText();
+					
+					//FOR TESTING PURPOSES
+					String server = "localhost";
+					int port = 8902;
+					String name = "test";					
+					
                     if (!server.equals("")
                         &&
                         port >= 0 && port <= 65535

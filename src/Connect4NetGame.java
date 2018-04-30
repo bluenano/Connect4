@@ -63,12 +63,17 @@ public class Connect4NetGame {
             out.println("SET " + game.getCurrentMove());
         }
 
-
+		public void updateStatus(String status) {
+			out.println(status);
+		}
+		
         // handles the other player move message
         public void opponentMoved(int column, int row) {
             out.println("OPPONENT_MOVED" + " " + column + " " + row);
-            String result = game.isWin() ? "DEFEAT" : game.isDraw() ? "DRAW" : "";
-            out.println(result);
+			System.out.println(game.toString());
+            // String result = game.isWin() ? "DEFEAT" : game.isDraw() ? "DRAW" : "";
+			System.out.println(game.isWin());
+            // out.println(result);
         }
 
 
@@ -93,13 +98,19 @@ public class Connect4NetGame {
                         synchronized(this) {
                             if (isValidMove(mark, column)) {
                                 int row = game.makeMove(column);
-                                game.switchTurns();
                                 out.println("VALID_MOVE " + column + " " + row);
                                 opponent.opponentMoved(column, row);
                                 updateIndicator();
                                 opponent.updateIndicator();
-                                String gameOver = game.isWin() ? "VICTORY" : game.isDraw() ? "DRAW" : "";
-                                out.println(gameOver);
+								if(game.isWin() != 'n'){
+									if(game.isWin() == game.getCurrentMove()){
+										out.println("VICTORY");
+										opponent.updateStatus("DEFEAT");
+									}
+								}
+								game.switchTurns();
+                                // String gameOver = game.isWin() ? "VICTORY" : game.isDraw() ? "DRAW" : "";
+                                // out.println(gameOver);
                             }
                         }
                     } else if (clientMessage.startsWith("QUIT")) {

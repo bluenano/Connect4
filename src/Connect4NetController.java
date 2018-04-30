@@ -79,7 +79,9 @@ public class Connect4NetController extends Connect4Controller implements Runnabl
     public void handleWin() {
         Platform.runLater(new Runnable() {
             public void run() {
-
+				view.displayMessage("You have won!!");
+				disableUserMoves();
+				//view.displayWin(getPlayer(), getPlayerColor());
             }
         });
     }
@@ -88,7 +90,8 @@ public class Connect4NetController extends Connect4Controller implements Runnabl
     public void handleDefeat() {
         Platform.runLater(new Runnable() {
             public void run() {
-
+				view.displayMessage("You have lost :(");
+				disableUserMoves();	
             }
         });
     }
@@ -102,6 +105,12 @@ public class Connect4NetController extends Connect4Controller implements Runnabl
         });
     }
 
+
+	private void disableUserMoves() {
+        view.disableColumns();
+        view.enablePlayAgain();
+        view.disableMoveIndicator();
+    }
 
     public void handleUserMove(int column) {
         out.println("MOVE " + column);
@@ -148,55 +157,63 @@ public class Connect4NetController extends Connect4Controller implements Runnabl
     @Override
     public void run() {
         // first message will be WELCOME <char>
-        String fromServer;
+        String serverInput;
         try {
             // you need to use Platform.runLater whenever you need to update the
             // GUI from a non-gui thread 
 
-            fromServer = in.readLine();
-            if (fromServer.startsWith("WELCOME")) {
-                mark = fromServer.charAt(8);
+            serverInput = in.readLine();
+			String[] fromServer = serverInput.split("\\s+");
+            if (fromServer[0].equals("WELCOME")) {
+                mark = fromServer[1].charAt(0);
                 handleMessage("Welcome, you are " + getPlayer());
             }
 
             // process messages from server
             while (true) {
-                fromServer = in.readLine();
-                if (fromServer.startsWith("VALID_MOVE")) {
+                serverInput = in.readLine();
+				fromServer = serverInput.split("\\s+");
+				System.out.println(fromServer[0]);
+                if (fromServer[0].equals("VALID_MOVE")) {
                     
-                    handleMove(Integer.parseInt(fromServer.substring(11, 12)),
-                               Integer.parseInt(fromServer.substring(13)),
+                    handleMove(Integer.parseInt(fromServer[1]),
+                               Integer.parseInt(fromServer[2]),
                                getPlayer(),
                                getPlayerColor());
-                } else if (fromServer.startsWith("OPPONENT_MOVED")) {
+                } else if (fromServer[0].equals("OPPONENT_MOVED")) {
 
-                    handleMove(Integer.parseInt(fromServer.substring(15,16)),
-                               Integer.parseInt(fromServer.substring(17)),
+                    handleMove(Integer.parseInt(fromServer[1]),
+                               Integer.parseInt(fromServer[2]),
                                getOpponent(),
                                getOpponentColor());
 
-                } else if (fromServer.startsWith("VICTORY")) {
+                } else if (fromServer[0].equals("VICTORY")) {
                     // display victory and lock controls
+					
                     handleWin();
-                } else if (fromServer.startsWith("DEFEAT")) {
+                } else if (fromServer[0].equals("DEFEAT")) {
                     // display defeat and lock controls
                     handleDefeat();
-                } else if (fromServer.startsWith("DRAW")) {
+                } else if (fromServer[0].equals("DRAW")) {
                     // display a tie and lock controls
                     handleDraw();
-                } else if (fromServer.startsWith("MESSAGE")) {
+                } else if (fromServer[0].equals("MESSAGE")) {
                     // display message in GUI
-                    String message = fromServer.substring(8);
+					String message = "";
+					for (int i = 1; i < fromServer.length; i++){
+						message += fromServer[i] + " ";
+					}
+					message.trim();
                     handleMessage(message);
-                } else if (fromServer.startsWith("NEW_GAME")) {
+                } else if (fromServer[0].equals("NEW_GAME")) {
                     // reset GUI
 
-                } else if (fromServer.startsWith("SET")) {
+                } else if (fromServer[0].equals("SET")) {
                     // I'm not sure why this works without using runLater
-                    char mark = fromServer.charAt(4);
+                    char mark = fromServer[1].charAt(0);
                     updateMoveIndicator(getColorFromServer(mark));
-                } else if (fromServer.startsWith("NAME")) {
-                    String opponent = fromServer.substring(5);
+                } else if (fromServer[0].equals("NAME")) {
+                    String opponent = fromServer[1];
                     // send to view for display
                     System.out.println("Name received: " + opponent);
                 }

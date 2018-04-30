@@ -23,6 +23,7 @@ public class Connect4Logic {
     private final char YELLOW = 'y';
 
     private char currentMove;
+	private char oppenentMove;
     private char[][] board;
 
 
@@ -104,8 +105,21 @@ public class Connect4Logic {
     }
 
 
-    public boolean isWin() {
-        return checkRows() || checkColumns() || checkDiagonals();
+    public char isWin() {
+		char temp = currentMove;
+		currentMove = 'r';
+		boolean checkRed = checkRows() || checkColumns() || checkDiagonals();
+		currentMove = 'y';
+		boolean checkYellow = checkRows() || checkColumns() || checkDiagonals();
+		currentMove = temp;
+		if(checkRed){
+			return RED;
+		}
+		else if(checkYellow){
+			return YELLOW;
+		}
+		else
+			return 'n';
     }
 
 
@@ -191,6 +205,9 @@ public class Connect4Logic {
         return (board[row][col] == currentMove) ? ++count : 0;
     }
 
+	private int checkOpponentCount(int count, int row, int col){
+	    return (board[row][col] == oppenentMove) ? ++count : 0;
+	}
 
     public void switchTurns() {
         currentMove = (currentMove == RED) ? YELLOW : RED;
