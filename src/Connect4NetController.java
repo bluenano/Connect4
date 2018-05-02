@@ -76,36 +76,13 @@ public class Connect4NetController extends Connect4Controller implements Runnabl
     }
 
 
-    public void handleWin() {
+    public void handleStateChange(String result) {
         Platform.runLater(new Runnable() {
             public void run() {
-                handleGameOver("Victory");
+                disableUserMoves();
+                view.displayMessage(result);
             }
         });
-    }
-
-
-    public void handleDefeat() {
-        Platform.runLater(new Runnable() {
-            public void run() {
-                handleGameOver("Defeat");
-            }
-        });
-    }
-
-
-    public void handleDraw() {
-        Platform.runLater(new Runnable() {
-            public void run() {
-                handleGameOver("Draw");
-            }
-        });
-    }
-
-
-    public void handleGameOver(String result) {
-        disableUserMoves();
-        view.displayMessage(result);
     }
 
 
@@ -190,13 +167,13 @@ public class Connect4NetController extends Connect4Controller implements Runnabl
 
                 } else if (fromServer.startsWith("VICTORY")) {
                     // display victory and lock controls
-                    handleWin();
+                    handleStateChange("You won");
                 } else if (fromServer.startsWith("DEFEAT")) {
                     // display defeat and lock controls
-                    handleDefeat();
+                    handleStateChange("You lost");
                 } else if (fromServer.startsWith("DRAW")) {
                     // display a tie and lock controls
-                    handleDraw();
+                    handleStateChange("Draw");
                 } else if (fromServer.startsWith("MESSAGE")) {
                     // display message in GUI
                     String message = fromServer.substring(8);
@@ -213,8 +190,7 @@ public class Connect4NetController extends Connect4Controller implements Runnabl
                     // send to view for display
                     System.out.println("Name received: " + opponent);
                 } else if (fromServer.startsWith("DISCONNECT")) {
-                    displayMessage("Opponent disconnected");
-                    disableUserMoves();
+                    handleStateChange("Opponent disconnected");
                 }
             }
         } catch (Exception e) {
