@@ -21,7 +21,8 @@
  *                        NEW_GAME
  *                        SET <char> 
  *                        NAME <string>
-*/                        
+ *                        DISCONNECT
+ */                        
 
 import java.io.BufferedReader;
 import java.io.IOException;

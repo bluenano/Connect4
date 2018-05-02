@@ -47,7 +47,7 @@ public class Connect4NetGame {
                 out = new PrintWriter(socket.getOutputStream(), true);
                 out.println("WELCOME " + mark);
                 out.println("MESSAGE Waiting for other player to connect");
-                updateIndicator();
+                updateClientIndicator();
             } catch (IOException e) {
                 System.out.println(e.getMessage());
             }
@@ -59,7 +59,12 @@ public class Connect4NetGame {
         }
 
 
-        public void updateIndicator() {
+        public void connectionLoss() {
+            out.println("DISCONNECT");
+        }
+
+
+        public void updateClientIndicator() {
             out.println("SET " + game.getCurrentMove());
         }
 
@@ -87,19 +92,30 @@ public class Connect4NetGame {
 
                 while (true) {
                     String clientMessage = in.readLine();
+                    
+                    if (clientMessage == null) {
+                        // client lost connection
+                        opponent.connectionLoss();
+                        return;
+                    }
 
                     if (clientMessage.startsWith("MOVE")) {
                         int column = Integer.parseInt(clientMessage.substring(5));
                         synchronized(this) {
                             if (isValidMove(mark, column)) {
                                 int row = game.makeMove(column);
-                                game.switchTurns();
                                 out.println("VALID_MOVE " + column + " " + row);
                                 opponent.opponentMoved(column, row);
-                                updateIndicator();
-                                opponent.updateIndicator();
-                                String gameOver = game.isWin() ? "VICTORY" : game.isDraw() ? "DRAW" : "";
-                                out.println(gameOver);
+                                if (game.isWin()) {
+                                    out.println("VICTORY");
+                                } else if (game.isDraw()) {
+                                    out.println("DRAW");
+                                } else {
+                                    game.switchTurns();
+                                    updateClientIndicator();
+                                    opponent.updateClientIndicator();
+                                }
+
                             }
                         }
                     } else if (clientMessage.startsWith("QUIT")) {
@@ -113,7 +129,7 @@ public class Connect4NetGame {
                     }
                 }
             } catch (IOException e) {
-                System.out.println("Client lost connection");
+                System.out.println(e.getMessage());
             } finally {
                 try {
                     socket.close();
