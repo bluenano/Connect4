@@ -47,7 +47,7 @@ public class Connect4NetGame {
                 out = new PrintWriter(socket.getOutputStream(), true);
                 out.println("WELCOME " + mark);
                 out.println("MESSAGE Waiting for other player to connect");
-                updateIndicator();
+                updateClientIndicator();
             } catch (IOException e) {
                 System.out.println(e.getMessage());
             }
@@ -64,7 +64,7 @@ public class Connect4NetGame {
         }
 
 
-        public void updateIndicator() {
+        public void updateClientIndicator() {
             out.println("SET " + game.getCurrentMove());
         }
 
@@ -112,8 +112,8 @@ public class Connect4NetGame {
                                     out.println("DRAW");
                                 } else {
                                     game.switchTurns();
-                                    updateIndicator();
-                                    opponent.updateIndicator();
+                                    updateClientIndicator();
+                                    opponent.updateClientIndicator();
                                 }
 
                             }

@@ -138,58 +138,64 @@ public class Connect4NetController extends Connect4Controller implements Runnabl
     @Override
     public void run() {
         // first message will be WELCOME <char>
-        String fromServer;
+        String serverInput;
         try {
             // you need to use Platform.runLater whenever you need to update the
             // GUI from a non-gui thread 
 
-            fromServer = in.readLine();
-            if (fromServer.startsWith("WELCOME")) {
-                mark = fromServer.charAt(8);
+            serverInput = in.readLine();
+            String[] tokens = serverInput.split("\\s+");
+
+            if (tokens[0].equals("WELCOME")) {
+                mark = tokens[1].charAt(0);
                 handleMessage("Welcome, you are " + getPlayer());
             }
 
             // process messages from server
             while (true) {
-                fromServer = in.readLine();
-                if (fromServer.startsWith("VALID_MOVE")) {
+                serverInput = in.readLine();
+                tokens = serverInput.split("\\s+");
+
+                if (tokens[0].equals("VALID_MOVE")) {
                     
-                    handleMove(Integer.parseInt(fromServer.substring(11, 12)),
-                               Integer.parseInt(fromServer.substring(13)),
+                    handleMove(Integer.parseInt(tokens[1]),
+                               Integer.parseInt(tokens[2]),
                                getPlayer(),
                                getPlayerColor());
-                } else if (fromServer.startsWith("OPPONENT_MOVED")) {
 
-                    handleMove(Integer.parseInt(fromServer.substring(15,16)),
-                               Integer.parseInt(fromServer.substring(17)),
+                } else if (tokens[0].equals("OPPONENT_MOVED")) {
+
+                    handleMove(Integer.parseInt(tokens[1]),
+                               Integer.parseInt(tokens[2]),
                                getOpponent(),
                                getOpponentColor());
 
-                } else if (fromServer.startsWith("VICTORY")) {
-                    // display victory and lock controls
+                } else if (tokens[0].equals("VICTORY")) {
                     handleStateChange("You won");
-                } else if (fromServer.startsWith("DEFEAT")) {
-                    // display defeat and lock controls
+                } else if (tokens[0].equals("DEFEAT")) {
                     handleStateChange("You lost");
-                } else if (fromServer.startsWith("DRAW")) {
-                    // display a tie and lock controls
+                } else if (tokens[0].equals("DRAW")) {
                     handleStateChange("Draw");
-                } else if (fromServer.startsWith("MESSAGE")) {
-                    // display message in GUI
-                    String message = fromServer.substring(8);
+                } else if (tokens[0].equals("MESSAGE")) {
+
+                    String message = "";
+                    for (int i = 1; i < tokens.length; i++){
+                        message += tokens[i] + " ";
+                    }
+                    message.trim();
                     handleMessage(message);
-                } else if (fromServer.startsWith("NEW_GAME")) {
+   
+                } else if (tokens[0].equals("NEW_GAME")) {
                     // reset GUI
 
-                } else if (fromServer.startsWith("SET")) {
-                    // I'm not sure why this works without using runLater
-                    char mark = fromServer.charAt(4);
+                } else if (tokens[0].equals("SET")) {
+                    char mark = tokens[1].charAt(0);
                     updateMoveIndicator(getColorFromServer(mark));
-                } else if (fromServer.startsWith("NAME")) {
-                    String opponent = fromServer.substring(5);
+                } else if (tokens[0].equals("NAME")) {
+                    String opponent = tokens[1];
                     // send to view for display
                     System.out.println("Name received: " + opponent);
-                } else if (fromServer.startsWith("DISCONNECT")) {
+                } else if (tokens[0].equals("DISCONNECT")) {
                     handleStateChange("Opponent disconnected");
                 }
             }
