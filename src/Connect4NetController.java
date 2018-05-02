@@ -79,7 +79,7 @@ public class Connect4NetController extends Connect4Controller implements Runnabl
     public void handleWin() {
         Platform.runLater(new Runnable() {
             public void run() {
-
+                handleGameOver("Victory");
             }
         });
     }
@@ -88,7 +88,7 @@ public class Connect4NetController extends Connect4Controller implements Runnabl
     public void handleDefeat() {
         Platform.runLater(new Runnable() {
             public void run() {
-
+                handleGameOver("Defeat");
             }
         });
     }
@@ -97,9 +97,15 @@ public class Connect4NetController extends Connect4Controller implements Runnabl
     public void handleDraw() {
         Platform.runLater(new Runnable() {
             public void run() {
-
+                handleGameOver("Draw");
             }
         });
+    }
+
+
+    public void handleGameOver(String result) {
+        disableUserMoves();
+        view.displayMessage(result);
     }
 
 
@@ -142,6 +148,13 @@ public class Connect4NetController extends Connect4Controller implements Runnabl
 
     public Color getColorFromServer(char fromServer) {
         return (fromServer == RED) ? Color.RED : Color.YELLOW;
+    }
+
+
+    private void disableUserMoves() {
+        view.disableColumns();
+        //view.enablePlayAgain();
+        view.disableMoveIndicator();
     }
 
 
@@ -199,6 +212,9 @@ public class Connect4NetController extends Connect4Controller implements Runnabl
                     String opponent = fromServer.substring(5);
                     // send to view for display
                     System.out.println("Name received: " + opponent);
+                } else if (fromServer.startsWith("DISCONNECT")) {
+                    displayMessage("Opponent disconnected");
+                    disableUserMoves();
                 }
             }
         } catch (Exception e) {
