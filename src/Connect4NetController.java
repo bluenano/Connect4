@@ -23,17 +23,23 @@ public class Connect4NetController extends Connect4Controller implements Runnabl
     private BufferedReader in;
     private PrintWriter out;
     private char mark;
-    private String name;  // use this as a display name in UI, might not need to store it
+    private String playerName; 
+    private String opponentName;
 
-    // have access to GUI named view
 
-    public Connect4NetController(String serverAddress, int port, String name) {
+    /**
+     * Constructor for the controller used in a networked game
+     * @param serverAddress the address of the server to connect to
+     * @param port the port to connect on
+     * @param playerName the display name of the player
+     */
+    public Connect4NetController(String serverAddress, int port, String playerName) {
         try {
             socket = new Socket(serverAddress, port);
             in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             out = new PrintWriter(socket.getOutputStream(), true);
-            this.name = name;
-            out.println("DISPLAY " + name);
+            this.playerName = playerName;
+            out.println("DISPLAY " + playerName);
         } catch (UnknownHostException e) {
             // close the program or maybe try to load the menu again
         } catch (IOException e) {
@@ -47,6 +53,9 @@ public class Connect4NetController extends Connect4Controller implements Runnabl
     }
 
 
+    /**
+     * Exit the application
+     */
     public void exitApplication() {
         Platform.runLater(new Runnable() {
             public void run() {
@@ -57,6 +66,10 @@ public class Connect4NetController extends Connect4Controller implements Runnabl
     }
 
 
+    /**
+     * Display a message in the GUI
+     * @param message the message to display
+     */
     public void handleMessage(String message) {
         Platform.runLater(new Runnable() {
             public void run() {
@@ -66,16 +79,29 @@ public class Connect4NetController extends Connect4Controller implements Runnabl
     }
 
 
-    public void handleMove(int column, int row, String player, Color c) {
+    /**
+     * Handle a move 
+     * @param player the display name of the player that moved
+     * @param col the column position that the move occurred at
+     * @param row the row position that the move occurred at 
+     * @param c the color of the player that moved
+     */
+    public void handleMove(String player, int col, int row, Color c) {
         Platform.runLater(new Runnable() {
             public void run() {
-                view.addDisc(column, row, c);
-                view.displayMove(player, column, row, c);
+                view.addDisc(col, row, c);
+                String move = generateMoveString(player, col, row);
+                view.displayMessage(move);
             }
         });
     }
 
 
+    /** 
+     * Handle change in the game state
+     * involves the game ended by draw or win/loss
+     * @param result the final state of the game
+     */
     public void handleStateChange(String result) {
         Platform.runLater(new Runnable() {
             public void run() {
@@ -86,15 +112,27 @@ public class Connect4NetController extends Connect4Controller implements Runnabl
     }
 
 
-    public void handleUserMove(int column) {
-        out.println("MOVE " + column);
+    /**
+     * Send a message to the server to request a move
+     * @param col the column position to move to
+     */
+    public void handleUserMove(int col) {
+        out.println("MOVE " + col);
     }
 
 
+    /**
+     * Reset the GUI after a game ended
+     */
     public void resetGame() {
 
     }
 
+
+    /**
+     * Update a move indicator in the GUI
+     * @param c the color that determines which move indicator to set
+     */
     public void updateMoveIndicator(Color c) {
         Platform.runLater(new Runnable() {
             public void run() {
@@ -104,37 +142,78 @@ public class Connect4NetController extends Connect4Controller implements Runnabl
     }
 
 
+    /**
+     * Set a label in the GUI depending on the mark
+     * @param mark the mark used to determine which label to set
+     * @param display the display name to set the label to
+     */
+    public void setLabel(char mark, String display) {
+        Platform.runLater(new Runnable() {
+            public void run() {
+                if (mark == RED) {
+                    view.setRedLabel(display);
+                } else {
+                    view.setYellowLabel(display);
+                }
+            }
+        });
+    }
+
+
+    /**
+     * Get the color of the player
+     * @return the color of the player
+     */
     public Color getPlayerColor() {
         return (mark == RED) ? Color.RED : Color.YELLOW;
     }
 
+
+    /**
+     * Get the color of the opponent
+     * @return the color of the opponent
+     */
     public Color getOpponentColor() {
         return (mark == RED) ? Color.YELLOW : Color.RED;
     }
 
 
+    /** 
+     * Get the display name of the player
+     * @return the display name
+     */
     public String getPlayer() {
-        return (mark == RED) ? "Player Red" : "Player Yellow";
+        return playerName;
     }
 
 
+    /**
+     * Get the display name of the opponent
+     * @return the display name of the opponent
+     */
     public String getOpponent() {
-        return (mark == RED) ? "Player Yellow" : "Player Red";
+        return opponentName;
     }
 
 
+    public char getOpponentMark() {
+        return (mark == RED) ? YELLOW : RED;
+    }
+
+
+    /**
+     * Get the color of the mark sent by the server
+     * @param fromServer the mark sent by the server
+     * @return the color of the mark sent by the server
+     */
     public Color getColorFromServer(char fromServer) {
         return (fromServer == RED) ? Color.RED : Color.YELLOW;
     }
 
 
-    private void disableUserMoves() {
-        view.disableColumns();
-        //view.enablePlayAgain();
-        view.disableMoveIndicator();
-    }
-
-
+    /**
+     * The run method of the Runnable interface
+     */
     @Override
     public void run() {
         // first message will be WELCOME <char>
@@ -148,6 +227,7 @@ public class Connect4NetController extends Connect4Controller implements Runnabl
 
             if (tokens[0].equals("WELCOME")) {
                 mark = tokens[1].charAt(0);
+                setLabel(mark, playerName);
                 handleMessage("Welcome, you are " + getPlayer());
             }
 
@@ -158,16 +238,16 @@ public class Connect4NetController extends Connect4Controller implements Runnabl
 
                 if (tokens[0].equals("VALID_MOVE")) {
                     
-                    handleMove(Integer.parseInt(tokens[1]),
+                    handleMove(getPlayer(),
+                               Integer.parseInt(tokens[1]),
                                Integer.parseInt(tokens[2]),
-                               getPlayer(),
                                getPlayerColor());
 
                 } else if (tokens[0].equals("OPPONENT_MOVED")) {
 
-                    handleMove(Integer.parseInt(tokens[1]),
+                    handleMove(getOpponent(),
+                               Integer.parseInt(tokens[1]),
                                Integer.parseInt(tokens[2]),
-                               getOpponent(),
                                getOpponentColor());
 
                 } else if (tokens[0].equals("VICTORY")) {
@@ -192,9 +272,8 @@ public class Connect4NetController extends Connect4Controller implements Runnabl
                     char mark = tokens[1].charAt(0);
                     updateMoveIndicator(getColorFromServer(mark));
                 } else if (tokens[0].equals("NAME")) {
-                    String opponent = tokens[1];
-                    // send to view for display
-                    System.out.println("Name received: " + opponent);
+                    opponentName = tokens[1];
+                    setLabel(getOpponentMark(), getOpponent());
                 } else if (tokens[0].equals("DISCONNECT")) {
                     handleStateChange("Opponent disconnected");
                 }

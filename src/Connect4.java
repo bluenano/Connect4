@@ -1,6 +1,6 @@
 /**
  * Connect4.java
- * Launches the Connect4 application.
+ * Launches the Connect4 client application.
  * compiles
  * working/tested
  */
@@ -18,11 +18,19 @@ import java.lang.NumberFormatException;
 public class Connect4 extends Application {
 
 
+    /**
+     * The main function
+     * @param args the command line arguments passed to this program
+     */
     public static void main(String [] args) {
         launch(args);
     }
 
 
+    /**
+     * Launch a local game of Connect4
+     * @param stage the Stage object to display scenes
+     */
     public void launchLocalGame(Stage stage) {
             Connect4Controller controller = new Connect4LocalController(
                                             new Connect4Logic());
@@ -36,6 +44,13 @@ public class Connect4 extends Application {
     }
 
 
+    /**
+     * Launch a networked game of Connect4
+     * @param stage the Stage object to display scenes
+     * @param server the address of the server to connect to
+     * @param port the port to connect on
+     * @param name the user name to connect as
+     */
     public void launchNetworkGame(Stage stage, String server,
                                   int port, String name) {
         Connect4NetController controller = new Connect4NetController(server, port, name);
@@ -52,22 +67,25 @@ public class Connect4 extends Application {
     }
 
 
-    public void showLaunchScene(Stage stage, Scene scene) {
+    /**
+     * Display a Scene object
+     * @param stage the Stage object to display the scene on
+     * @param scene the Scene object to display
+     * @param title the title of the scene
+     */
+    public void showScene(Stage stage, Scene scene, String title) {
         stage.setScene(scene);
-        stage.setTitle("Connect4");
+        stage.setTitle(title);
         stage.show();
     }
 
 
-    public void showNetInfoScene(Stage stage, Scene scene) {
-        stage.setScene(scene);
-        stage.setTitle("Network Connection Information");
-        stage.show();
-    }
-
-
-    // creates and initializes the launch scene
-    public void launchScene(Stage stage) {
+    /**
+     * Creates all of the menu objects and 
+     * displays the main menu
+     * @param stage the Stage object to display the main menu on
+     */
+    public void launchMainMenu(Stage stage) {
 
         Button local = new Button("Play Local");
         local.setOnMouseClicked(e -> {
@@ -103,30 +121,36 @@ public class Connect4 extends Application {
             });          
 
             menu.setOnMouseClicked(e3 -> {
-                launchScene(stage);
+                launchMainMenu(stage);
                                 
             });
 
-            showNetInfoScene(stage, 
-                               Components.createNetInfoScene(connect,
-                                                             menu,                                                         
-                                                             address,
-                                                             textPort,
-                                                             displayName));
+            showScene(stage, 
+                      Components.createNetInfo(connect,
+                                               menu,                                                         
+                                               address,
+                                               textPort,
+                                               displayName),
+                      "Network Connection Information");
             connect.requestFocus();
         });
 
         Button quit = new Button("Quit");
         quit.setOnMouseClicked(e -> System.exit(0));
 
-        showLaunchScene(stage, 
-                        Components.createLaunchScene(local, online, quit));        
+        showScene(stage, 
+                  Components.createMainMenu(local, online, quit),
+                  "Connect4");        
     }
 
 
+    /**
+     * Starts the Connect 4 client
+     * @param stage the Stage object to display scenes on
+     */
     @Override
     public void start(Stage primaryStage) throws Exception {
-        launchScene(primaryStage);
+        launchMainMenu(primaryStage);
     }
 
 

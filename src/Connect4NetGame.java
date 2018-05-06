@@ -15,20 +15,35 @@ public class Connect4NetGame {
 
     private Connect4Logic game;
 
+    /**
+     * Constructor for the Connect4NetGame object
+     * @param game the Connect4Logic object used in this game
+     */
     public Connect4NetGame(Connect4Logic game) {
         this.game = game;
     }
 
-    // unsure if this should be synchronized since I use a synchronized block
-    //public synchronized boolean isValidMove(char mark, int column) {
-    public boolean isValidMove(char mark, int column) {
+    
+    /**
+     * Check if a move is valid
+     * @param mark the mark of the player requesting a move
+     * @param col the column position to move to
+     * @return true if the move is valid, false otherwise
+     */
+    //public synchronized boolean isValidMove(char mark, int col) {
+    public boolean isValidMove(char mark, int col) {
         return mark == game.getCurrentMove() 
                &&
-               game.verifyMove(column);
+               game.verifyMove(col);
     }
     
 
 
+    /**
+     * Inner class that is threaded
+     * An inner class makes sense here because it needs access to the
+     * instance variables of Connect4NetGame
+     */
     public class ClientHandler extends Thread {
 
         private char mark;
@@ -38,6 +53,11 @@ public class Connect4NetGame {
         private ClientHandler opponent;
 
 
+        /** 
+         * Constructor for the ClientHandler object
+         * @param socket the Socket object to communicate with
+         * @param mark the player mark assigned to this client
+         */
         public ClientHandler(Socket socket, char mark) {
             this.socket = socket;
             this.mark = mark;
@@ -54,35 +74,60 @@ public class Connect4NetGame {
 
         }
 
+
+        /**
+         * Set the thread of the opponent
+         * @param opponent the opponent thread
+         */
         public void setOpponent(ClientHandler opponent) {
             this.opponent = opponent;
         }
 
 
+        /**
+         * Send a connection loss message to the client
+         * Occurs if the opponent of this client loses connection
+         */
         public void connectionLoss() {
             out.println("DISCONNECT");
         }
 
 
+        /**
+         * Send a message to the client to indicate what color
+         * to set the move indicator
+         */
         public void updateClientIndicator() {
             out.println("SET " + game.getCurrentMove());
         }
 
 
-        // handles the other player move message
-        public void opponentMoved(int column, int row) {
-            out.println("OPPONENT_MOVED" + " " + column + " " + row);
+        /** 
+         * Send a message to the client that indicates the opponent
+         * made a move
+         * @param col the column position that the opponent moved to
+         * @param row the row position that the opponent moved to
+         */
+        public void opponentMoved(int col, int row) {
+            out.println("OPPONENT_MOVED" + " " + col + " " + row);
             String result = game.isWin() ? "DEFEAT" : game.isDraw() ? "DRAW" : "";
             out.println(result);
         }
 
 
+        /**
+         * Send a message to the client to indicate the opponents display name
+         * @param name the name of the opponent
+         */ 
         public void setOpponentName(String name) {
-            System.out.println("NAME " + name);
             out.println("NAME " + name);
         }
 
 
+
+        /** 
+         * The Thread run method
+         */
         public void run() {
             try {
                 out.println("MESSAGE Players have connected, the game will begin now");
@@ -94,7 +139,7 @@ public class Connect4NetGame {
                     String clientMessage = in.readLine();
                     
                     if (clientMessage == null) {
-                        // client lost connection
+                        // lost connection to this client
                         opponent.connectionLoss();
                         return;
                     }
@@ -124,7 +169,6 @@ public class Connect4NetGame {
 
                     } else if (clientMessage.startsWith("DISPLAY")) {
                         String name = clientMessage.substring(8);
-                        System.out.println("Received: " + name);
                         opponent.setOpponentName(name);
                     }
                 }
