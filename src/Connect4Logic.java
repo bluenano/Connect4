@@ -13,13 +13,13 @@ import java.util.Random;
 public class Connect4Logic {
 
 
-    private final int ROWS = 6;
-    private final int COLUMNS = 7;
-    private final int WIN = 4;
+    private static final int ROWS = 6;
+    private static final int COLUMNS = 7;
+    private static final int WIN = 4;
 
-    private final char EMPTY = 'e';
-    private final char RED = 'r';
-    private final char YELLOW = 'y';
+    private static final char EMPTY = 'e';
+    private static final char RED = 'r';
+    private static final char YELLOW = 'y';
 
     private char currentMove;
     private char[][] board;
@@ -169,7 +169,7 @@ public class Connect4Logic {
         for(int i = 0; i < ROWS; i++) {
             int count = 0;
             for(int j = 0; j < COLUMNS; j++) {
-                count = checkCount(count, i, j);
+                count = updateCount(count, i, j);
                 if (count == WIN) {
                     return true;
                 }
@@ -187,7 +187,7 @@ public class Connect4Logic {
         for(int i = 0; i < COLUMNS; i++) {
             int count = 0;
             for(int j = 0; j < ROWS; j++) {
-                count = checkCount(count, j, i);
+                count = updateCount(count, j, i);
                 if (count == WIN) {
                     return true;
                 }
@@ -232,7 +232,7 @@ public class Connect4Logic {
     private boolean checkRightDiagonal(int row, int col) {
         int count = 0;
         while (row < ROWS && col < COLUMNS) {
-            count = checkCount(count, row, col);
+            count = updateCount(count, row, col);
             if (count == WIN) {
                 return true;
             }
@@ -252,7 +252,7 @@ public class Connect4Logic {
     private boolean checkLeftDiagonal(int row, int col) {
         int count = 0;
         while (row < ROWS && col >= 0) {
-            count = checkCount(count, row, col);
+            count = updateCount(count, row, col);
             if (count == WIN) {
                 return true;
             }
@@ -264,14 +264,14 @@ public class Connect4Logic {
 
 
     /**
-     * Check the count, increment and return the count
-     * if the tested location is equal to the current move
+     * Update the count by checking the value of the location
+     * given by row and column
      * @param count the current count
      * @param row the row position to check
      * @param col the column position to check
      * @return the updated count
      */
-    private int checkCount(int count, int row, int col) {
+    private int updateCount(int count, int row, int col) {
         return (board[row][col] == currentMove) ? ++count : 0;
     }
 
