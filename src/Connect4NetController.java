@@ -75,52 +75,27 @@ public class Connect4NetController extends Connect4Controller implements Runnabl
         });
     }
 
-
-    public void handleWin() {
+    public void handleNewGame() {
         Platform.runLater(new Runnable() {
             public void run() {
-				view.displayMessage("You have won!!");
-				disableUserMoves();
-				//view.displayWin(getPlayer(), getPlayerColor());
+				view.setUIScene();
             }
         });
     }
-
-
-    public void handleDefeat() {
+	
+    public void handleStateChange(String result) {
         Platform.runLater(new Runnable() {
             public void run() {
-				view.displayMessage("You have lost :(");
-				disableUserMoves();	
+                disableUserMoves();
+                view.displayMessage(result);
             }
         });
-    }
-
-
-    public void handleDraw() {
-        Platform.runLater(new Runnable() {
-            public void run() {
-
-            }
-        });
-    }
-
-
-	private void disableUserMoves() {
-        view.disableColumns();
-        view.enablePlayAgain();
-        view.disableMoveIndicator();
     }
 
     public void handleUserMove(int column) {
         out.println("MOVE " + column);
     }
-
-
-    public void resetGame() {
-
-    }
-
+	
     public void updateMoveIndicator(Color c) {
         Platform.runLater(new Runnable() {
             public void run() {
@@ -129,7 +104,10 @@ public class Connect4NetController extends Connect4Controller implements Runnabl
         });
     }
 
-
+    public void resetGame() {
+		out.println("REMATCH_PLS");
+    }
+	
     public Color getPlayerColor() {
         return (mark == RED) ? Color.RED : Color.YELLOW;
     }
@@ -154,6 +132,13 @@ public class Connect4NetController extends Connect4Controller implements Runnabl
     }
 
 
+    private void disableUserMoves() {
+        view.disableColumns();
+        view.enablePlayAgain();
+        view.disableMoveIndicator();
+    }
+
+
     @Override
     public void run() {
         // first message will be WELCOME <char>
@@ -163,59 +148,60 @@ public class Connect4NetController extends Connect4Controller implements Runnabl
             // GUI from a non-gui thread 
 
             serverInput = in.readLine();
-			String[] fromServer = serverInput.split("\\s+");
-            if (fromServer[0].equals("WELCOME")) {
-                mark = fromServer[1].charAt(0);
+            String[] tokens = serverInput.split("\\s+");
+
+            if (tokens[0].equals("WELCOME")) {
+                mark = tokens[1].charAt(0);
                 handleMessage("Welcome, you are " + getPlayer());
             }
 
             // process messages from server
             while (true) {
                 serverInput = in.readLine();
-				fromServer = serverInput.split("\\s+");
-				System.out.println(fromServer[0]);
-                if (fromServer[0].equals("VALID_MOVE")) {
+                tokens = serverInput.split("\\s+");
+
+                if (tokens[0].equals("VALID_MOVE")) {
                     
-                    handleMove(Integer.parseInt(fromServer[1]),
-                               Integer.parseInt(fromServer[2]),
+                    handleMove(Integer.parseInt(tokens[1]),
+                               Integer.parseInt(tokens[2]),
                                getPlayer(),
                                getPlayerColor());
-                } else if (fromServer[0].equals("OPPONENT_MOVED")) {
 
-                    handleMove(Integer.parseInt(fromServer[1]),
-                               Integer.parseInt(fromServer[2]),
+                } else if (tokens[0].equals("OPPONENT_MOVED")) {
+
+                    handleMove(Integer.parseInt(tokens[1]),
+                               Integer.parseInt(tokens[2]),
                                getOpponent(),
                                getOpponentColor());
 
-                } else if (fromServer[0].equals("VICTORY")) {
-                    // display victory and lock controls
-					
-                    handleWin();
-                } else if (fromServer[0].equals("DEFEAT")) {
-                    // display defeat and lock controls
-                    handleDefeat();
-                } else if (fromServer[0].equals("DRAW")) {
-                    // display a tie and lock controls
-                    handleDraw();
-                } else if (fromServer[0].equals("MESSAGE")) {
-                    // display message in GUI
-					String message = "";
-					for (int i = 1; i < fromServer.length; i++){
-						message += fromServer[i] + " ";
-					}
-					message.trim();
-                    handleMessage(message);
-                } else if (fromServer[0].equals("NEW_GAME")) {
-                    // reset GUI
+                } else if (tokens[0].equals("VICTORY")) {
+                    handleStateChange("You won");
+                } else if (tokens[0].equals("DEFEAT")) {
+                    handleStateChange("You lost");
+                } else if (tokens[0].equals("DRAW")) {
+                    handleStateChange("Draw");
+                } else if (tokens[0].equals("MESSAGE")) {
 
-                } else if (fromServer[0].equals("SET")) {
-                    // I'm not sure why this works without using runLater
-                    char mark = fromServer[1].charAt(0);
+                    String message = "";
+                    for (int i = 1; i < tokens.length; i++){
+                        message += tokens[i] + " ";
+                    }
+                    message.trim();
+                    handleMessage(message);
+   
+                } else if (tokens[0].equals("NEW_GAME")) {
+                    // reset GUI
+					handleNewGame();
+                }				
+				else if (tokens[0].equals("SET")) {
+                    char mark = tokens[1].charAt(0);
                     updateMoveIndicator(getColorFromServer(mark));
-                } else if (fromServer[0].equals("NAME")) {
-                    String opponent = fromServer[1];
+                } else if (tokens[0].equals("NAME")) {
+                    String opponent = tokens[1];
                     // send to view for display
                     System.out.println("Name received: " + opponent);
+                } else if (tokens[0].equals("DISCONNECT")) {
+                    handleStateChange("Opponent disconnected");
                 }
             }
         } catch (Exception e) {

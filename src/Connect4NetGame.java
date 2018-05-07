@@ -36,6 +36,7 @@ public class Connect4NetGame {
         private PrintWriter out;
         private Socket socket;
         private ClientHandler opponent;
+		private int rematch_counter = 1;
 
 
         public ClientHandler(Socket socket, char mark) {
@@ -47,7 +48,7 @@ public class Connect4NetGame {
                 out = new PrintWriter(socket.getOutputStream(), true);
                 out.println("WELCOME " + mark);
                 out.println("MESSAGE Waiting for other player to connect");
-                updateIndicator();
+                updateClientIndicator();
             } catch (IOException e) {
                 System.out.println(e.getMessage());
             }
@@ -59,29 +60,38 @@ public class Connect4NetGame {
         }
 
 
-        public void updateIndicator() {
+        public void connectionLoss() {
+            out.println("DISCONNECT");
+        }
+
+
+        public void updateClientIndicator() {
             out.println("SET " + game.getCurrentMove());
         }
 
-		public void updateStatus(String status) {
-			out.println(status);
-		}
-		
+
         // handles the other player move message
         public void opponentMoved(int column, int row) {
             out.println("OPPONENT_MOVED" + " " + column + " " + row);
-			System.out.println(game.toString());
-            // String result = game.isWin() ? "DEFEAT" : game.isDraw() ? "DRAW" : "";
-			System.out.println(game.isWin());
-            // out.println(result);
+            String result = game.isWin() ? "DEFEAT" : game.isDraw() ? "DRAW" : "";
+            out.println(result);
         }
 
+		// sends a rematch message to the opponent
+        public void sendRematch() {
+            out.println("MESSAGE Your opponent wants a rematch. Press 'play again' to accept");
+            // String result = game.isWin() ? "DEFEAT" : game.isDraw() ? "DRAW" : "";
+            // out.println(result);
+        }
 
         public void setOpponentName(String name) {
             System.out.println("NAME " + name);
             out.println("NAME " + name);
         }
 
+		public void resetOpponent(){
+			out.println("NEW_GAME " + game.getCurrentMove());
+		}
 
         public void run() {
             try {
@@ -92,6 +102,12 @@ public class Connect4NetGame {
 
                 while (true) {
                     String clientMessage = in.readLine();
+                    
+                    if (clientMessage == null) {
+                        // client lost connection
+                        opponent.connectionLoss();
+                        return;
+                    }
 
                     if (clientMessage.startsWith("MOVE")) {
                         int column = Integer.parseInt(clientMessage.substring(5));
@@ -100,23 +116,35 @@ public class Connect4NetGame {
                                 int row = game.makeMove(column);
                                 out.println("VALID_MOVE " + column + " " + row);
                                 opponent.opponentMoved(column, row);
-                                updateIndicator();
-                                opponent.updateIndicator();
-								if(game.isWin() != 'n'){
-									if(game.isWin() == game.getCurrentMove()){
-										out.println("VICTORY");
-										opponent.updateStatus("DEFEAT");
-									}
-								}
-								game.switchTurns();
-                                // String gameOver = game.isWin() ? "VICTORY" : game.isDraw() ? "DRAW" : "";
-                                // out.println(gameOver);
+                                if (game.isWin()) {
+                                    out.println("VICTORY");
+                                } else if (game.isDraw()) {
+                                    out.println("DRAW");
+                                } else {
+                                    game.switchTurns();
+                                    updateClientIndicator();
+                                    opponent.updateClientIndicator();
+                                }
+
                             }
                         }
                     } else if (clientMessage.startsWith("QUIT")) {
                         return;
-                    } else if (clientMessage.startsWith("REMATCH")) {
-
+                    } else if (clientMessage.startsWith("REMATCH_PLS")) {
+						synchronized(this) {
+							game.incRematch();
+							if (game.getRematchCount() == 1){								
+								opponent.sendRematch();
+							}
+							else if(game.getRematchCount() == 2){
+								game.resetRematch();
+								// if both clients have sent a REMATCH_PLS request to server, then server tells both clients to reset
+								game.reset();
+								out.println("NEW_GAME");
+								opponent.resetOpponent();
+							}
+                            
+                        }
                     } else if (clientMessage.startsWith("DISPLAY")) {
                         String name = clientMessage.substring(8);
                         System.out.println("Received: " + name);
@@ -124,7 +152,7 @@ public class Connect4NetGame {
                     }
                 }
             } catch (IOException e) {
-                System.out.println("Client lost connection");
+                System.out.println(e.getMessage());
             } finally {
                 try {
                     socket.close();

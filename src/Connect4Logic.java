@@ -23,8 +23,8 @@ public class Connect4Logic {
     private final char YELLOW = 'y';
 
     private char currentMove;
-	private char oppenentMove;
     private char[][] board;
+	private int rematch_counter =0;
 
 
     public Connect4Logic() {
@@ -47,7 +47,6 @@ public class Connect4Logic {
         clear();
     }
 
-
     public int getRows() {
         return ROWS;
     }
@@ -62,6 +61,9 @@ public class Connect4Logic {
         return currentMove;
     }
 
+	public int getRematchCount(){
+		return rematch_counter;
+	}
 
     private char setFirstMove() {
         Random rand = new Random();
@@ -105,24 +107,18 @@ public class Connect4Logic {
     }
 
 
-    public char isWin() {
-		char temp = currentMove;
-		currentMove = 'r';
-		boolean checkRed = checkRows() || checkColumns() || checkDiagonals();
-		currentMove = 'y';
-		boolean checkYellow = checkRows() || checkColumns() || checkDiagonals();
-		currentMove = temp;
-		if(checkRed){
-			return RED;
-		}
-		else if(checkYellow){
-			return YELLOW;
-		}
-		else
-			return 'n';
+    public boolean isWin() {
+        return checkRows() || checkColumns() || checkDiagonals();
     }
 
-
+	public void incRematch(){
+		rematch_counter += 1;
+	}
+	
+	public void resetRematch(){
+		rematch_counter = 0;
+	}
+	
     private boolean checkRows() {
         for(int i = 0; i < ROWS; i++) {
             int count = 0;
@@ -205,9 +201,6 @@ public class Connect4Logic {
         return (board[row][col] == currentMove) ? ++count : 0;
     }
 
-	private int checkOpponentCount(int count, int row, int col){
-	    return (board[row][col] == oppenentMove) ? ++count : 0;
-	}
 
     public void switchTurns() {
         currentMove = (currentMove == RED) ? YELLOW : RED;
