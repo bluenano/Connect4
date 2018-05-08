@@ -51,6 +51,7 @@ public class Connect4NetGame {
         private PrintWriter out;
         private Socket socket;
         private ClientHandler opponent;
+		    private int rematch_counter = 1;
 
 
         /** 
@@ -88,6 +89,7 @@ public class Connect4NetGame {
          * Send a connection loss message to the client
          * Occurs if the opponent of this client loses connection
          */
+
         public void connectionLoss() {
             out.println("DISCONNECT");
         }
@@ -114,6 +116,12 @@ public class Connect4NetGame {
             out.println(result);
         }
 
+		// sends a rematch message to the opponent
+        public void sendRematch() {
+            out.println("MESSAGE Your opponent wants a rematch. Press 'play again' to accept");
+            // String result = game.isWin() ? "DEFEAT" : game.isDraw() ? "DRAW" : "";
+            // out.println(result);
+        }
 
         /**
          * Send a message to the client to indicate the opponents display name
@@ -123,6 +131,9 @@ public class Connect4NetGame {
             out.println("NAME " + name);
         }
 
+		public void resetOpponent(){
+			out.println("NEW_GAME " + game.getCurrentMove());
+		}
 
 
         /** 
@@ -165,8 +176,21 @@ public class Connect4NetGame {
                         }
                     } else if (clientMessage.startsWith("QUIT")) {
                         return;
-                    } else if (clientMessage.startsWith("REMATCH")) {
-
+                    } else if (clientMessage.startsWith("REMATCH_PLS")) {
+						synchronized(this) {
+							game.incRematch();
+							if (game.getRematchCount() == 1){								
+								opponent.sendRematch();
+							}
+							else if(game.getRematchCount() == 2){
+								game.resetRematch();
+								// if both clients have sent a REMATCH_PLS request to server, then server tells both clients to reset
+								game.reset();
+								out.println("NEW_GAME");
+								opponent.resetOpponent();
+							}
+                            
+                        }
                     } else if (clientMessage.startsWith("DISPLAY")) {
                         String name = clientMessage.substring(8);
                         opponent.setOpponentName(name);

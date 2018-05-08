@@ -96,6 +96,13 @@ public class Connect4NetController extends Connect4Controller implements Runnabl
         });
     }
 
+    public void handleNewGame() {
+        Platform.runLater(new Runnable() {
+            public void run() {
+				view.setUIScene();
+            }
+        });
+    }
 
     /** 
      * Handle change in the game state
@@ -125,7 +132,7 @@ public class Connect4NetController extends Connect4Controller implements Runnabl
      * Reset the GUI after a game ended
      */
     public void resetGame() {
-
+        out.println("REMATCH_PLS");
     }
 
 
@@ -158,7 +165,7 @@ public class Connect4NetController extends Connect4Controller implements Runnabl
             }
         });
     }
-
+  
 
     /**
      * Get the color of the player
@@ -238,6 +245,7 @@ public class Connect4NetController extends Connect4Controller implements Runnabl
 
                 if (tokens[0].equals("VALID_MOVE")) {
                     
+
                     handleMove(getPlayer(),
                                Integer.parseInt(tokens[1]),
                                Integer.parseInt(tokens[2]),
@@ -247,7 +255,7 @@ public class Connect4NetController extends Connect4Controller implements Runnabl
 
                     handleMove(getOpponent(),
                                Integer.parseInt(tokens[1]),
-                               Integer.parseInt(tokens[2]),
+                               Integer.parseInt(tokens[2]),c      
                                getOpponentColor());
 
                 } else if (tokens[0].equals("VICTORY")) {
@@ -267,7 +275,8 @@ public class Connect4NetController extends Connect4Controller implements Runnabl
    
                 } else if (tokens[0].equals("NEW_GAME")) {
                     // reset GUI
-
+            					handleNewGame();
+                
                 } else if (tokens[0].equals("SET")) {
                     char mark = tokens[1].charAt(0);
                     updateMoveIndicator(getColorFromServer(mark));
