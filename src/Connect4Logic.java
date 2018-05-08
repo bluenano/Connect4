@@ -23,7 +23,7 @@ public class Connect4Logic {
 
     private char currentMove;
     private char[][] board;
-	  private int rematch_counter =0;
+	private int rematch_counter = 0;
 
 
     /**
@@ -82,9 +82,15 @@ public class Connect4Logic {
         return currentMove;
     }
 
+
+    /**
+     * Get the rematch count
+     * @return the rematch count
+     */
 	public int getRematchCount(){
 		return rematch_counter;
 	}
+
 
     /**
      * Use a random number generator to select the player 
@@ -164,10 +170,18 @@ public class Connect4Logic {
         return checkRows() || checkColumns() || checkDiagonals();
     }
 
+
+    /**
+     * Increment the rematch counter
+     */
 	public void incRematch(){
 		rematch_counter += 1;
 	}
-	
+
+	   
+    /**
+     * Reset the rematch counter
+     */
 	public void resetRematch(){
 		rematch_counter = 0;
 	}

@@ -17,8 +17,6 @@ import java.lang.NumberFormatException;
 
 public class Connect4NetController extends Connect4Controller implements Runnable {
     
-    private static int PORT = 8902;
-
     private Socket socket;
     private BufferedReader in;
     private PrintWriter out;
@@ -96,13 +94,23 @@ public class Connect4NetController extends Connect4Controller implements Runnabl
         });
     }
 
-    public void handleNewGame() {
+
+    /**
+     * Handle message from server to start a new game on the client
+     * @param firstMove the mark that will go first so the GUI
+     * can update the move indicator correctly
+     */
+    public void handleNewGame(char firstMove) {
         Platform.runLater(new Runnable() {
             public void run() {
 				view.setUIScene();
+                setLabel(mark, getPlayer());
+                setLabel(getOpponentMark(), getOpponent());
+                updateMoveIndicator(getColorFromServer(firstMove));
             }
         });
     }
+
 
     /** 
      * Handle change in the game state
@@ -223,12 +231,9 @@ public class Connect4NetController extends Connect4Controller implements Runnabl
      */
     @Override
     public void run() {
-        // first message will be WELCOME <char>
+
         String serverInput;
         try {
-            // you need to use Platform.runLater whenever you need to update the
-            // GUI from a non-gui thread 
-
             serverInput = in.readLine();
             String[] tokens = serverInput.split("\\s+");
 
@@ -238,13 +243,11 @@ public class Connect4NetController extends Connect4Controller implements Runnabl
                 handleMessage("Welcome, you are " + getPlayer());
             }
 
-            // process messages from server
             while (true) {
                 serverInput = in.readLine();
                 tokens = serverInput.split("\\s+");
 
                 if (tokens[0].equals("VALID_MOVE")) {
-                    
 
                     handleMove(getPlayer(),
                                Integer.parseInt(tokens[1]),
@@ -255,7 +258,7 @@ public class Connect4NetController extends Connect4Controller implements Runnabl
 
                     handleMove(getOpponent(),
                                Integer.parseInt(tokens[1]),
-                               Integer.parseInt(tokens[2]),c      
+                               Integer.parseInt(tokens[2]),      
                                getOpponentColor());
 
                 } else if (tokens[0].equals("VICTORY")) {
@@ -274,9 +277,7 @@ public class Connect4NetController extends Connect4Controller implements Runnabl
                     handleMessage(message);
    
                 } else if (tokens[0].equals("NEW_GAME")) {
-                    // reset GUI
-            					handleNewGame();
-                
+            		handleNewGame(tokens[1].charAt(0));                
                 } else if (tokens[0].equals("SET")) {
                     char mark = tokens[1].charAt(0);
                     updateMoveIndicator(getColorFromServer(mark));
@@ -288,9 +289,7 @@ public class Connect4NetController extends Connect4Controller implements Runnabl
                 }
             }
         } catch (Exception e) {
-            System.out.println("Exception in run method of Connect4NetController");
-            System.out.println("Connection error");
-            System.out.println("Closing the application...");
+            System.out.println(e.getMessage());
             exitApplication();            
         }
     }

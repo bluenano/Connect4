@@ -104,7 +104,7 @@ public class Connect4GUI extends Application {
     public void setUIScene() {
         createGameUI();
         stage.setScene(scene);
-        // stage.setMaximized(true);
+        //stage.setMaximized(true);
     }
 
 
@@ -218,7 +218,6 @@ public class Connect4GUI extends Application {
         hbox.setAlignment(Pos.CENTER);
         hbox.setSpacing(FONT_SIZE);
         setupButtons(hbox);
-        //disablePlayAgain();
         togglePlayAgain(true);
         return hbox;
     }
@@ -231,11 +230,9 @@ public class Connect4GUI extends Application {
     private void setupButtons(HBox box) {
         play = createButton("Play again");
         quit = createButton("Quit");
-		// When 'play' is pressed, client sends REMATCH request to server
         play.setOnMouseClicked(e -> {
             controller.resetGame();
-				// Don't want to spam server with requests
-				    play.setDisable(true);
+			play.setDisable(true);
         });
         quit.setOnMouseClicked(e -> System.exit(0));
         box.getChildren().addAll(play, quit);

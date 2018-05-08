@@ -105,10 +105,6 @@ public class Connect4 extends Application {
                     String server = address.getText();
                     int port = Integer.parseInt(textPort.getText());
                     String name = displayName.getText();
-					// TESTING CONVENIENCE
-					// String server = "localhost";
-                    // int port = 8902;
-                    // String name = "blob";
                     if (!server.equals("")
                         &&
                         port >= 0 && port <= 65535
