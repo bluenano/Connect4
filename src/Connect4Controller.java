@@ -3,6 +3,7 @@
  * abstract class for a controller 
 */
 
+import java.lang.StringBuilder;
 import javafx.scene.paint.Color;
 
 public abstract class Connect4Controller {
@@ -19,39 +20,76 @@ public abstract class Connect4Controller {
     public abstract Color getPlayerColor();
     public abstract String getPlayer();
 
+
+    /**
+     * Initialize the view object
+     * @param view the GUI object
+     */
     public void attachView(Connect4GUI view) {
         this.view = view;
     }
 
+
+    /**
+     * Get the number of rows in the game
+     * @return the number of rows in the game
+     */
     public int getRows() {
         return ROWS;
     }
 
+
+    /**
+     * Get the number of columns in the game
+     * @return the number of columns in the game
+     */
     public int getColumns() {
         return COLUMNS;
     }
 
 
+    /**
+     * Get the color of a mark
+     * @param mark the character to test {'r'|'y'}
+     * @return the color of the mark 
+     */    
     public Color getColor(char mark) {
         return (mark == RED) ? Color.RED : Color.YELLOW;
     }
 
-   protected void handleWin() {
+    
+    /**
+     * Handle the event where a player wins
+     */
+    protected void handleGameOver(String result) {
         disableUserMoves();
-        view.displayWin(getPlayer(), getPlayerColor());
+        view.displayMessage(result);
     }
 
 
-    protected void handleDraw() {
-        disableUserMoves();
-        view.displayDraw();
-    }
-
-
-    private void disableUserMoves() {
+    /**
+     * Disable GUI functionality when the game ends and
+     * enable the play again functionality
+     */
+    protected void disableUserMoves() {
         view.disableColumns();
-        view.enablePlayAgain();
-        view.disableMoveIndicator();
+        view.togglePlayAgain(false);
+        view.disableMoveIndicators();
     }
 
+    /**
+     * Generate the string used to display a move message in the GUI
+     * @param player the name of the player who moved
+     * @param col the position in the columns that the move occured at
+     * @param row the position in the rows that the move occured at
+     * @return the string to indicate a move
+     */
+    protected String generateMoveString(String player, int col, int row) {
+        StringBuilder buildMove = new StringBuilder(player + " moved to column ");
+        buildMove.append(Integer.toString(col+1));
+        buildMove.append(", row ");
+        buildMove.append(Integer.toString(row+1));
+        buildMove.append(".");
+        return buildMove.toString();
+    }
 }

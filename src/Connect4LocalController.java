@@ -1,7 +1,7 @@
 /**
  * Connect4LocalController.java
  * Controller to communicate between the GUI and
- * the game logic.
+ * the game logic in a local game.
  * compiles
  * working/tested
  */
@@ -12,69 +12,101 @@ import javafx.scene.paint.Color;
 
 public class Connect4LocalController extends Connect4Controller {
 
+
     private Connect4Logic game;
 
-    private static final char RED = 'r';
-    private static final char YELLOW = 'r';
 
-
+    /**
+     * Constructor for the controller used in a local game
+     * @param game the game logic
+     */
     public Connect4LocalController(Connect4Logic game) {
         this.game = game;
     }
 
 
-    public void handleUserMove(int column) {    
-        if (game.verifyMove(column)) {
-            sendMoveUpdates(column);
+    /**
+     * Handle the event where a user moves
+     * @param column the column position the user wants to move to
+     */
+    public void handleUserMove(int col) {    
+        if (game.verifyMove(col)) {
+            sendMoveUpdates(col);
         }
     }
 
 
-    private void sendMoveUpdates(int column) {
-        int row = game.makeMove(column);
-        view.addDisc(column, row, getPlayerColor());
-        checkForGameOver(column, row);
+    /**
+     * Send updates to the GUI and the logic when
+     * a player moves
+     * @param column the column position the user is moving to
+     */
+    private void sendMoveUpdates(int col) {
+        int row = game.makeMove(col);
+        view.addDisc(col, row, getPlayerColor());
+        checkForGameOver(col, row);
     }
 
 
-    private void checkForGameOver(int column, int row) {
+    /**
+     * Check if the game is over
+     * @param column the column position of the most recent move
+     * @param row the row position of the most recent move
+     */
+    private void checkForGameOver(int col, int row) {
         if (game.isWin()) {
-            super.handleWin();
+            handleGameOver(getPlayer() + " won the game");
         } else if (game.isDraw()) {
-            super.handleDraw();
+            handleGameOver("The game ended in a draw");
         } else {
-            handleNextMove(column, row);
+            handleNextMove(col, row);
         }
     }
 
  
-    private void handleNextMove(int column, int row) {
-        view.displayMove(getPlayer(), column, row, getPlayerColor());
+    /**
+     * Set the game up for the next move
+     * @param column the column position of the most recent move
+     * @param row the row position of the most recent move
+     */
+    private void handleNextMove(int col, int row) {
+        String move = generateMoveString(getPlayer(), col, row);
+        view.displayMessage(move);
         switchTurns();
     }
 
 
-    private boolean getCurrentMove() {
-        return game.getCurrentMove() == RED;
-    }
-
-
+    /**
+     * Update the logic and GUI after a user moves
+     */
     public void switchTurns() {
         game.switchTurns();
         view.setMoveIndicatorFill(getPlayerColor());
     }
 
 
+    /**
+     * Reset the logic and GUI
+     */
     public void resetGame() {
         game.reset();
         view.setUIScene();
     }
 
 
+    /**
+     * Get the player whose turn it is
+     * @return the String representing the player
+     */
     public String getPlayer() {
-        return (getCurrentMove()) ? "Player Red" : "Player Yellow";
+        return (game.getCurrentMove() == RED) ? "Player Red" : "Player Yellow";
     }
 
+
+    /**
+     * Get the color of the player whose turn it is
+     * @return the Color of the player
+     */
     public Color getPlayerColor() {
         return (game.getCurrentMove() == RED) ? Color.RED : Color.YELLOW;
     }

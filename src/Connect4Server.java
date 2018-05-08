@@ -1,5 +1,3 @@
-// package statement
-
 /**
  * Connect4Server.java 
  * A server for a networked Connect4
@@ -7,6 +5,11 @@
  * clients via strings and adheres to the
  * Connect4 protocol.
  * 
+ * default port is 8902
+ * you can also specify a port on the command line
+ * usage: 
+ * java Connect4Server
+ * java Connect4Server <port>
  * Connect4 protocol
  *
  * Client -> Server       Server -> Client
@@ -39,9 +42,21 @@ public class Connect4Server {
     private static char YELLOW = 'y';
 
 
+    /**
+     * Main function of the server application
+     * @param args the command line arguments passed to this program
+     */
     public static void main(String[] args) {
         try {
-            ServerSocket listener = new ServerSocket(PORT); 
+            ServerSocket listener;
+            if (args.length == 2) {
+                int port = Integer.parseInt(args[1]);
+                listener = new ServerSocket(port);
+                System.out.println("Listening on " + port);
+            } else {
+                listener = new ServerSocket(PORT); 
+                System.out.println("Listening on " + PORT);
+            }
             while (true) {
                 Connect4NetGame game = new Connect4NetGame(new Connect4Logic());
                 Connect4NetGame.ClientHandler p1 = game.new ClientHandler(listener.accept(), RED);

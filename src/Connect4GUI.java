@@ -1,14 +1,12 @@
 /**
  * Connect4GUI.java
- * GUI implementation to represent the Connect4 game
+ * GUI object to represent the Connect 4 game
  * compiles
  * working/tested
  */
 
 
 import java.util.ArrayList;
-import java.lang.StringBuilder;
-import java.lang.Integer;
 import javafx.animation.TranslateTransition;
 import javafx.application.Application;
 import javafx.scene.Scene;
@@ -37,6 +35,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.Button;
 import javafx.application.Platform;
 
+
 public class Connect4GUI extends Application {
 
     private static final int TILE_SIZE = 80;
@@ -48,7 +47,7 @@ public class Connect4GUI extends Application {
     private static final Color RED = Color.RED;
     private static final Color YELLOW = Color.YELLOW;
     private static final Color DRAW = Color.WHITE;
-    private static final Color BACKGROUND = Color.WHITE;
+
 
     private Stage stage;
     private Scene scene;
@@ -64,8 +63,16 @@ public class Connect4GUI extends Application {
     private Circle yellowIndicator;
     private Button play;
     private Button quit;
+    private Label redLabel;
+    private Label yellowLabel;
     
 
+
+    /**
+     * Constructor for Connect4GUI
+     * @param controller the controller object that handles communication
+     * between the GUI and the game logic
+     */
     public Connect4GUI(Connect4Controller controller) {
         this.controller = controller;
         controller.attachView(this);
@@ -75,6 +82,9 @@ public class Connect4GUI extends Application {
     }  
 
 
+    /**
+     * Creates the game user interface
+     */
     public void createGameUI() {
         initializeGridElements();
         setupMoveIndicator();
@@ -88,6 +98,9 @@ public class Connect4GUI extends Application {
     }
 
 
+    /**
+     * Create the game user interface and set the scene
+     */
     public void setUIScene() {
         createGameUI();
         stage.setScene(scene);
@@ -95,10 +108,17 @@ public class Connect4GUI extends Application {
     }
 
 
+    /**
+     * Close the application
+     */
     public void close() {
         Platform.exit();
     }
 
+
+    /**
+     * Initialize the objects used to create the game board
+     */
     private void initializeGridElements() {
         layout = new BorderPane();
         gridRoot = new Group();
@@ -106,18 +126,19 @@ public class Connect4GUI extends Application {
     }
 
 
+    /**
+     * Create the move indicators used to show whose turn it is
+     */
     private void setupMoveIndicator() {
-        redIndicator = createIndicator();
-        yellowIndicator = createIndicator();
+        redIndicator = new Circle(INDICATOR_RADIUS);
+        yellowIndicator = new Circle(INDICATOR_RADIUS);
         setMoveIndicatorFill(controller.getPlayerColor());
     }
 
 
-    private Circle createIndicator() {
-        return new Circle(INDICATOR_RADIUS);
-    }
-
-
+    /**
+     * Setup the grid object used to create the game board
+     */
     private void setupGrid() {
         gridRoot.prefWidth(TILE_SIZE * columnSize);
         gridRoot.prefHeight(TILE_SIZE * rowSize);
@@ -127,26 +148,58 @@ public class Connect4GUI extends Application {
     }
 
 
+    /**
+     * Setup the layout object of the game user interface
+     */
     private void setupLayout() {
         moveLog = createBackground();
         options = createOptions();
-        addPlayerBoxes("Player Red", "Player Yellow");
+        redLabel = new Label("Player Red");
+        yellowLabel = new Label("Player Yellow");
+        addPlayerBoxes();
         layout.setCenter(gridRoot);
         layout.setTop(moveLog);
         layout.setBottom(options);
     }
 
 
-    private void addPlayerBoxes(String player1, String player2) {
-        Pane red = createPlayerBox("Player Red", RED);
-        Pane yellow = createPlayerBox("Player Yellow", YELLOW);
-        red.getChildren().add(redIndicator);
-        yellow.getChildren().add(yellowIndicator);
-        layout.setLeft(red);
-        layout.setRight(yellow);
+    /**
+     * Set the red yellow
+     * @param text the new label text
+     */
+    public void setRedLabel(String text) {
+        redLabel.setText(text);
     }
 
 
+    /**
+     * Set the yellow label
+     * @param text the new label text
+     */
+    public void setYellowLabel(String text) {
+        yellowLabel.setText(text);
+    }
+
+
+    /**
+     * Add player boxes to the layout
+     * @param red the player who is red
+     * @param yellow the player who is yellow
+     */
+    private void addPlayerBoxes() {
+        Pane redPane = createPlayerBox(redLabel, RED);
+        Pane yellowPane = createPlayerBox(yellowLabel, YELLOW);
+        redPane.getChildren().add(redIndicator);
+        yellowPane.getChildren().add(yellowIndicator);
+        layout.setLeft(redPane);
+        layout.setRight(yellowPane);
+    }
+
+
+    /**
+     * Create the background of the game board
+     * @return the background object
+     */
     private StackPane createBackground() {
         StackPane background = new StackPane();
         setupPane(background, BOX_WIDTH, TILE_SIZE * columnSize);
@@ -155,31 +208,45 @@ public class Connect4GUI extends Application {
     }
 
 
+    /**
+     * Create the pane that holds the option buttons
+     * @return the options object
+     */
     private HBox createOptions() {
         HBox hbox = new HBox();
         setupPane(hbox, BOX_WIDTH, TILE_SIZE * columnSize);
         hbox.setAlignment(Pos.CENTER);
         hbox.setSpacing(FONT_SIZE);
         setupButtons(hbox);
-        disablePlayAgain();
+        //disablePlayAgain();
+        togglePlayAgain(true);
         return hbox;
     }
 
 
+    /**
+     * Setup the buttons in the options pane
+     * @param box the pane object used to hold the options
+     */
     private void setupButtons(HBox box) {
         play = createButton("Play again");
         quit = createButton("Quit");
 		// When 'play' is pressed, client sends REMATCH request to server
         play.setOnMouseClicked(e -> {
-                controller.resetGame();
+            controller.resetGame();
 				// Don't want to spam server with requests
-				play.setDisable(true);
+				    play.setDisable(true);
         });
         quit.setOnMouseClicked(e -> System.exit(0));
         box.getChildren().addAll(play, quit);
     }
 
 
+    /**
+     * Create a button used in the GUI
+     * @param display the text of the button
+     * @return a button used in the GUI
+     */
     private Button createButton(String display) {
         Button button = new Button(display);
         button.setPrefWidth(BUTTON_WIDTH);
@@ -187,25 +254,32 @@ public class Connect4GUI extends Application {
     }
 
 
-    public void enablePlayAgain() {
-        play.setDisable(false);
-
+    /**
+     * Toggle the play again button
+     * @param disable the boolean value that determines
+     * whether to show the button or not
+     */
+    public void togglePlayAgain(boolean disable) {
+        play.setDisable(disable);
     }
 
 
-    public void disablePlayAgain() {
-        play.setDisable(true);
-    }
-
-
+    /**
+     * Setup a pane object used in the GUI
+     * @param pane the pane to setup
+     * @param height the preferred height of the pane
+     * @param width the preferred width of the pane
+     */
     private void setupPane(Pane pane, int height, int width) {
         pane.setPrefHeight(height);
         pane.setPrefWidth(width);
-        //BackgroundFill color = new BackgroundFill(BACKGROUND, null, null);
-        //pane.setBackground(new Background(color));
     }
 
 
+    /**
+     * Create the grid object used to represent the game board
+     * @return the grid object that represents the game board
+     */
     private Shape createGrid() {
         Shape grid = new Rectangle(columnSize * TILE_SIZE, rowSize * TILE_SIZE);
         for (int x = 0; x < columnSize; x++) {
@@ -219,6 +293,9 @@ public class Connect4GUI extends Application {
     }
 
 
+    /**
+     * Create the columns used as elements of the game board
+     */
     private void createColumns() {
         for (int x = 0; x < columnSize; x++) {
             Rectangle rect = new Rectangle(TILE_SIZE, rowSize * TILE_SIZE);
@@ -230,6 +307,13 @@ public class Connect4GUI extends Application {
     }
 
 
+    /**
+     * Create a grid circle used as a piece in the game board
+     * @param x the x position in the game board
+     * @param y the y position in the game board
+     * @param color the color of the piece
+     * @return a piece used in the game board
+     */
     private Circle createGridCircle(int x, int y, Color color) {
         Circle circle = new Circle(TILE_SIZE / 3);
         circle.setCenterX(x * TILE_SIZE + TILE_SIZE / 2);
@@ -239,6 +323,10 @@ public class Connect4GUI extends Application {
     }
 
 
+    /**
+     * Create the light used to light the game board
+     * @return Light.Distant the light object 
+     */
     private Light.Distant createLight() {
         Light.Distant light = new Light.Distant();
         light.setAzimuth(45.0);
@@ -247,6 +335,11 @@ public class Connect4GUI extends Application {
     }
 
 
+    /**
+     * Create the lighting used to show the user what column they are selecting
+     * @param light the light object
+     * @return the lighting object
+     */
     private Lighting createLighting(Light.Distant light) {
         Lighting lighting = new Lighting();
         lighting.setLight(light);
@@ -255,13 +348,21 @@ public class Connect4GUI extends Application {
     }
 
 
-    private void initializeColumnAction(Rectangle rect, int colPosition) {
+    /**
+     * Initialize the actions of a column in the game board
+     * @param rect the column
+     * @param col the position in the columns 
+     */
+    private void initializeColumnAction(Rectangle rect, int col) {
         rect.setOnMouseEntered(e -> rect.setFill(Color.rgb(200, 200, 50, 0.3)));
         rect.setOnMouseExited(e -> rect.setFill(Color.TRANSPARENT));
-        rect.setOnMouseClicked(e -> controller.handleUserMove(colPosition));
+        rect.setOnMouseClicked(e -> controller.handleUserMove(col));
     }
 
 
+    /**
+     * Disable the actions of the columns
+     */
     public void disableColumns() {
         for(int i = 0; i < columns.size(); i++) {
             columns.get(i).setOnMouseClicked(null);
@@ -269,80 +370,89 @@ public class Connect4GUI extends Application {
     }
 
 
-    private void display(Text move) {
+    /**
+     * Display a Text object in the GUI
+     * @param text the text to display
+     */
+    private void display(Text text) {
         clearDisplay();
-        addDisplay(move);
+        addDisplay(text);
     }
 
 
+    /**
+     * Add a Text object to the display pane
+     * @param display the Text object to display
+     */
     private void addDisplay(Text display) {
         moveLog.getChildren().add(display);
     }
 
 
+    /**
+     * Clear the display pane
+     */
     private void clearDisplay() {
         moveLog.getChildren().clear();
     }
 
 
-    public void displayWin(String player, Color color) {
-        display(generateDisplay(player + " has won the game.", color));
-    }
-
-
-    public void displayDraw() {
-        display(generateDisplay("The game ended in a draw.", DRAW));
-    }
-
-
+    /**
+     * Display a message in the GUI
+     * @param message the string to display
+     */
     public void displayMessage(String message) {
-        display(generateDisplay(message, null));
+        display(generateDisplay(message));
     }
 
 
-    public void displayMove(String player, int colPosition, int rowPosition, Color color) {
-        String move = generateMoveString(player, colPosition, rowPosition);
-        display(generateDisplay(move, color));
-    }
-
-
-    private String generateMoveString(String player, int colPosition, int rowPosition) {
-        StringBuilder buildMove = new StringBuilder(player + " moved to column ");
-        buildMove.append(Integer.toString(colPosition+1));
-        buildMove.append(", row ");
-        buildMove.append(Integer.toString(rowPosition+1));
-        buildMove.append(".");
-        return buildMove.toString();
-    }
-
-
-    public void addDisc(int colPosition, int rowPosition, Color color) {
+    /**
+     * Add a piece to the game board
+     * @param col the position in the columns to add a piece to
+     * @param row the position in the rows to add a piece to
+     * @param color the color of the piece to add to the game board
+     */
+    public void addDisc(int col, int row, Color color) {
         Circle insert = new Circle(TILE_SIZE / 3, color);
         insert.setCenterX(TILE_SIZE / 2);
         insert.setCenterY(TILE_SIZE / 2);
-        insert.setTranslateX(colPosition * TILE_SIZE);
+        insert.setTranslateX(col * TILE_SIZE);
         gridRoot.getChildren().add(insert);
-        playAnimation(insert, rowPosition);
+        playAnimation(insert, row);
     }
 
 
-    private void playAnimation(Circle circle, int rowPosition) {
+    /**
+     * Play the animation that shows a piece being placed on the
+     * game board
+     * @param circle the piece being placed
+     * @param rowPosition the row position to place the piece
+     */
+    private void playAnimation(Circle circle, int row) {
         TranslateTransition animation = new TranslateTransition(Duration.seconds(0.5), circle);
-        animation.setToY(rowPosition * TILE_SIZE);
+        animation.setToY(row * TILE_SIZE);
         animation.play();
     }
 
 
-    private Pane createPlayerBox(String label, Color color) {
+    /**
+     * Create a player box used in the GUI
+     * @param player the name of the player
+     * @return the pane object used to display a player box
+     */
+    private Pane createPlayerBox(Label label, Color color) {
         VBox display = new VBox();
         setupDisplayBox(display);
-        Label player = new Label(label);
-        player.setFont(new Font(FONT_SIZE));
-        display.getChildren().add(player);
+        label.setFont(new Font(FONT_SIZE));
+        display.getChildren().add(label);
         return display;
     }
 
 
+    /**
+     * Setup the pane that displays messages in the GUI
+     * @param display the pane used to display messages
+     */
     private void setupDisplayBox(VBox display) {
         display.setPrefWidth(BOX_WIDTH);
         display.setPrefHeight(TILE_SIZE * rowSize);
@@ -351,20 +461,32 @@ public class Connect4GUI extends Application {
     }
 
 
-    private Text generateDisplay(String outcome, Color color) {
+    /**
+     * Generate a Text object to display in the GUI
+     * @param display the string to display
+     * @return the Text object to display
+     */
+    private Text generateDisplay(String display) {
         Text result = new Text();
-        result.setText(outcome);
-        //result.setFill(color);
+        result.setText(display);
         result.setFont(new Font(FONT_SIZE));
         return result;
     }
 
 
+    /**
+     * Set the move indicator to indicate whose turn it is
+     * @param player the color of the player whose turn it is
+     */
     public void switchTurns(Color player) {
         setMoveIndicatorFill(player);
     }
 
 
+    /**
+     * Set the color of a move indicator
+     * @param player the color of the current player
+     */
     public void setMoveIndicatorFill(Color player) {
         if (player == RED) {
             redIndicator.setFill(RED);
@@ -376,12 +498,19 @@ public class Connect4GUI extends Application {
     }
 
 
-    public void disableMoveIndicator() {
-        redIndicator.setFill(BACKGROUND);
-        yellowIndicator.setFill(BACKGROUND);
+    /**
+     * Disable the red and yellow move indicators
+     */
+    public void disableMoveIndicators() {
+        redIndicator.setFill(null);
+        yellowIndicator.setFill(null);
     }
 
 
+    /**
+     * Start the game by initializing the user interface
+     * @param primaryStage the Stage object used to show the GUI
+     */
     public void startGame(Stage primaryStage) {
         stage = primaryStage;
         setUIScene();
@@ -390,6 +519,10 @@ public class Connect4GUI extends Application {
     }
 
 
+    /**
+     * Launch the GUI application
+     * @param primaryStage the Stage object used to display the GUI
+     */
     @Override
     public void start(Stage primaryStage) throws Exception {
         startGame(primaryStage);
