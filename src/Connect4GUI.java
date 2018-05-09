@@ -104,7 +104,7 @@ public class Connect4GUI extends Application {
     public void setUIScene() {
         createGameUI();
         stage.setScene(scene);
-        //stage.setMaximized(true);
+        stage.setMaximized(true);
     }
 
 

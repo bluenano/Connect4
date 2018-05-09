@@ -51,7 +51,7 @@ public class Connect4NetGame {
         private PrintWriter out;
         private Socket socket;
         private ClientHandler opponent;
-		private int rematch_counter = 1;
+        private int rematch_counter = 1;
 
 
         /** 
@@ -117,7 +117,7 @@ public class Connect4NetGame {
         }
 
 
-		/**
+        /**
          * Send the rematch string
          */
         public void sendRematch() {
@@ -138,9 +138,9 @@ public class Connect4NetGame {
          * Send the new game message to the client
          * @param mark the new first move mark
          */
-		public void resetGame(char mark){
-			out.println("NEW_GAME " + mark);
-		}
+        public void resetGame(char mark){
+            out.println("NEW_GAME " + mark);
+        }
 
 
         /** 
@@ -187,19 +187,19 @@ public class Connect4NetGame {
                         return;
 
                     } else if (clientMessage.startsWith("REMATCH_PLS")) {
-						
+                        
                         synchronized(this) {
-							game.incRematch();
-							if (game.getRematchCount() == 1){								
-								opponent.sendRematch();
-							}
-							else if(game.getRematchCount() == 2){
-								game.resetRematch();
-								game.reset();
+                            game.incRematch();
+                            if (game.getRematchCount() == 1){                               
+                                opponent.sendRematch();
+                            }
+                            else if(game.getRematchCount() == 2){
+                                game.resetRematch();
+                                game.reset();
                                 char firstMove = game.getCurrentMove();
                                 resetGame(firstMove);
-								opponent.resetGame(firstMove);
-							}
+                                opponent.resetGame(firstMove);
+                            }
                             
                         }
 
